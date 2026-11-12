@@ -6,6 +6,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.Startup;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.ProcessingException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.UUID;
@@ -52,6 +53,7 @@ public class Reservations {
                 .whenComplete((done, failure) -> {
                     if (failure instanceof TimeoutException) {
                         trace(started, "timed out, customer told to try again");
+                        Stream.of(parts).forEach(part -> part.cancel(true));
                     }
                 })
                 .thenApply(done -> new Reservation(id, request.seats()));
@@ -59,8 +61,13 @@ public class Reservations {
 
     private void pay(UUID id, int seats, long started) {
         trace(started, "charging card");
-        payments.charge(id, seats * 4_500);
-        trace(started, "card charged");
+        try {
+            payments.charge(id, seats * 4_500);
+            trace(started, "card charged");
+        } catch (ProcessingException e) {
+            trace(started, "payment call cancelled");
+            throw e;
+        }
     }
 
     private void trace(long started, String event) {
