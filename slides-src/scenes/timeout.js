@@ -1,94 +1,65 @@
-// Demo 3: one timeline, three runs. The caller gives up at the deadline; what the payment
-// task does next is the whole story. Timestamps are the ones the Java demos printed.
+// Deadlines: one timeline, two runs. The caller gives up at the deadline; what the payment
+// does next is the whole story. Timestamps are the ones the Liberty app logged.
 
 const { svg, el, fmt, clamp, lerp, ease } = Deck;
 
 const AXIS_MS = 2000;
-const DEADLINE_MS = 200;
+const DEADLINE_MS = 500;
 const LEAD_MS = 700;      // lets the slide settle before the clock starts
 const FADE_MS = 160;
 const BEAT_MS = 420;      // spacing between log lines that share a millisecond
 const EXTRA_MS = 1200;
 const CAP_PX = 10;
 const TICK_PX = 16;
-const BADGE_PX = 58;
 const CAPS_MID = 0.36;    // baseline offset that centres capitals, as a share of font size
 const RETRY_AT_MS = 700;  // "some time after the timeout"; never printed
 
 const RUNS = {
   leak: {
-    end: 1812,
-    alarmFrom: 205,
+    end: 1850,
+    alarmFrom: 507,
     verdict: 'alarm',
     spans: [
-      { lane: 'caller', from: 0, to: 205, state: 'is-wait' },
-      { lane: 'caller', from: 205, to: 1812, state: 'is-late', note: 'HANDLER STUCK: CLOSING THE EXECUTOR WAITS FOR THE TASK', plate: true },
-      { lane: 'task', from: 2, to: 205, state: 'is-run' },
-      { lane: 'task', from: 205, to: 1812, state: 'is-leak', note: 'NOBODY IS WAITING FOR THIS' },
+      { lane: 'caller', from: 0, to: 507, state: 'is-wait' },
+      { lane: 'task', from: 1, to: 507, state: 'is-run' },
+      { lane: 'task', from: 507, to: 1850, state: 'is-leak', note: 'NOBODY IS WAITING FOR THIS' },
     ],
     events: [
-      { at: 2, lane: 'task', row: 'b2', text: 'charging card', start: true },
-      { at: 205, lane: 'caller', row: 'a1', text: 'timed out, customer told to try again' },
-      { at: 1812, lane: 'task', row: 'b1', text: 'card charged', tone: 'alarm', flip: true },
-      { at: 1812, lane: 'caller', row: 'a2', text: 'handler returned', flip: true, beat: 1 },
+      { at: 1, lane: 'task', row: 'b2', text: 'charging card', start: true },
+      { at: 507, lane: 'caller', row: 'a1', text: 'timed out, customer told to try again' },
+      { at: 1850, lane: 'task', row: 'b1', text: 'card charged', tone: 'alarm', flip: true },
     ],
     legend: [
       ['is-run', 'RUNNING'],
       ['is-wait', 'WAITING'],
-      ['is-late', 'STUCK PAST THE DEADLINE'],
       ['is-leak', 'NOBODY WAITS FOR IT'],
     ],
     extra: 'retry',
   },
 
   cancel: {
-    end: 209,
+    end: 507,
     verdict: 'good',
     spans: [
-      { lane: 'caller', from: 0, to: 209, state: 'is-wait' },
-      { lane: 'task', from: 4, to: 209, state: 'is-run' },
+      { lane: 'caller', from: 0, to: 506, state: 'is-wait' },
+      { lane: 'task', from: 1, to: 507, state: 'is-run' },
     ],
     events: [
-      { at: 4, lane: 'task', row: 'b2', text: 'charging card', start: true },
-      { at: 209, lane: 'caller', row: 'a1', text: 'timed out, customer told to try again' },
-      { at: 209, lane: 'task', row: 'b1', text: 'payment cancelled', tone: 'good', beat: 2 },
-      { at: 209, lane: 'caller', row: 'a2', text: 'handler returned', beat: 3 },
+      { at: 1, lane: 'task', row: 'b2', text: 'charging card', start: true },
+      { at: 506, lane: 'caller', row: 'a1', text: 'timed out, customer told to try again' },
+      { at: 507, lane: 'task', row: 'b1', text: 'payment call cancelled', tone: 'good', beat: 2 },
     ],
-    interrupt: { at: 209, beat: 1, text: 'reservation.cancel(true)' },
-    stop: { at: 209, beat: 2 },
-    ghost: { from: 209, to: 1812, text: 'LAST RUN KEPT WORKING UNTIL 1,812 ms' },
-    swallow: { from: 4, at: 209 },
+    interrupt: { at: 507, beat: 1, text: 'part.cancel(true)' },
+    stop: { at: 507, beat: 2 },
+    ghost: { from: 507, to: 1850, text: 'LAST RUN KEPT WORKING UNTIL 1,850 ms' },
+    provider: { from: 1, to: 1800 },
     legend: [
       ['is-run', 'RUNNING'],
       ['is-wait', 'WAITING'],
       ['is-ok', 'STOPPED CLEANLY'],
       ['is-leak', 'NOBODY WAITS FOR IT'],
     ],
-    extra: 'swallow',
-  },
-
-  structured: {
-    end: 208,
-    verdict: 'good',
-    scope: { to: 208, text: 'SCOPE · 200 ms' },
-    labelGap: BADGE_PX,
-    spans: [
-      { lane: 'caller', from: 0, to: 208, state: 'is-wait' },
-      { lane: 'task', from: 3, to: 207, state: 'is-run' },
-    ],
-    events: [
-      { at: 3, lane: 'task', row: 'b2', text: 'charging card', start: true },
-      { at: 207, lane: 'task', row: 'b1', text: 'payment cancelled', tone: 'good', order: 1 },
-      { at: 208, lane: 'caller', row: 'a1', text: 'timed out, customer told to try again', beat: 1, order: 2 },
-      { at: 208, lane: 'caller', row: 'a2', text: 'handler returned', beat: 2, order: 3 },
-    ],
-    stop: { at: 207, beat: 0 },
-    legend: [
-      ['is-run', 'RUNNING'],
-      ['is-wait', 'WAITING'],
-      ['is-ok', 'STOPPED CLEANLY'],
-    ],
-    extra: 'order',
+    extra: 'provider',
   },
 };
 
@@ -191,15 +162,6 @@ function drawLegend({ axis, geo }, entries) {
   }
 }
 
-function drawScope({ ground, geo }, scope) {
-  const { caller, task } = geo.lanes;
-  const y = caller.y - 12;
-  ground.append(svg('rect', {
-    class: 'box is-heavy', x: -14, y, width: geo.x(scope.to) + 6 + 14, height: task.y + task.h + 12 - y,
-  }));
-  flag(ground, -17, y - 40, scope.text);
-}
-
 function drawGhost({ ground, geo }, ghost) {
   const lane = geo.lanes.task;
   const x = geo.x(ghost.from) + CAP_PX;
@@ -298,13 +260,13 @@ function logLabel(parent, entry) {
   };
 }
 
-function makeEvent(chart, entry, labelGap) {
+function makeEvent(chart, entry) {
   const { geo } = chart;
   const lane = geo.lanes[entry.lane];
   const edge = entry.lane === 'caller' ? lane.y : lane.y + lane.h;
   const row = geo.rows[entry.row];
   const x = entry.start ? geo.left + 12 : geo.x(entry.at);
-  const reach = TICK_PX + labelGap;
+  const reach = TICK_PX;
   const group = svg('g');
   chart.labels.append(group);
 
@@ -317,8 +279,6 @@ function makeEvent(chart, entry, labelGap) {
 
   return {
     at: entry.at + (entry.beat || 0) * BEAT_MS,
-    order: entry.order,
-    badgeAt: { x: x + TICK_PX + labelGap / 2 - 4, y: row },
     show(p) {
       fade(group, p);
       label.pop(p);
@@ -412,56 +372,32 @@ function buildRetry(chart, root) {
   ];
 }
 
-function buildSwallow(chart, root, run) {
+function buildProvider(chart, root, run) {
   const { geo } = chart;
   const lane = geo.lanes.extra;
-  const { from, at } = run.swallow;
-  const end = geo.x(at);
-  const name = laneName(chart.axis, geo, 'extra', 'IF SWALLOWED');
-  const track = svg('g', {}, [
-    svg('rect', { class: 'bar is-run', x: geo.x(from), y: lane.y, width: end - geo.x(from), height: lane.h }),
-    svg('rect', { class: 'bar is-leak', x: end, y: lane.y, width: CAP_PX, height: lane.h }),
-  ]);
-  chart.bars.append(track);
-
-  const said = logLabel(chart.labels, { text: 'payment cancelled' });
-  said.place(end + CAP_PX + TICK_PX, lane.mid);
-  const arrowX = end + CAP_PX + TICK_PX + said.width + 10;
-  const then = svg('line', {
-    class: 'wire', x1: arrowX, y1: lane.mid, x2: arrowX + 56, y2: lane.mid, 'marker-end': 'url(#arrow)',
+  const { from, to } = run.provider;
+  const x = geo.x(from);
+  const end = geo.x(to);
+  const name = laneName(chart.axis, geo, 'extra', 'PROVIDER');
+  const bar = svg('rect', { class: 'bar is-leak', x, y: lane.y, width: 0, height: lane.h });
+  chart.bars.append(bar);
+  const charged = logLabel(chart.labels, { text: 'card charged' });
+  charged.place(end - charged.width - 12, lane.mid);
+  const note = el('div', {
+    class: 'note',
+    style: { left: geo.x(900) + 'px', top: geo.rows.b2 - 30 + 'px', '--tilt': '-1deg' },
+    text: 'it already had the request',
   });
-  chart.labels.append(then);
-  const charged = logLabel(chart.labels, { at, text: 'card charged', tone: 'alarm' });
-  charged.place(arrowX + 72, lane.mid);
-
+  root.append(note);
   return [
-    { from: 0, to: 0.14, show: p => { fade(name, p); fade(track, p); } },
-    { from: 0.3, to: 0.44, show: p => fade(said.node, p) },
-    { from: 0.55, to: 0.66, show: p => fade(then, p) },
-    { from: 0.72, to: 0.9, show: p => { fade(charged.node, p); charged.pop(p); } },
+    { from: 0, to: 0.12, show: p => fade(name, p) },
+    { from: 0.12, to: 0.7, show: p => bar.setAttribute('width', (end - x) * p) },
+    { from: 0.72, to: 0.88, show: p => { fade(charged.node, p); charged.pop(p); } },
+    { from: 0.82, to: 0.96, show: p => fade(note, p) },
   ];
 }
 
-function badge(layer, at, number) {
-  const group = svg('g', {}, [
-    svg('circle', { class: 'timeout-badge', r: 23 }),
-    svg('text', { class: 'timeout-badge-num', y: 14, text: number }),
-  ]);
-  layer.append(group);
-  return p => {
-    group.setAttribute('transform', `translate(${at.x} ${at.y}) scale(${lerp(1.8, 1, ease.out(p))})`);
-    fade(group, p);
-  };
-}
-
-function buildOrder(chart, root, run, events) {
-  return events.filter(event => event.order).map(event => {
-    const from = (event.order - 1) * 0.3;
-    return { from, to: from + 0.16, show: badge(chart.labels, event.badgeAt, event.order) };
-  });
-}
-
-const EXTRAS = { retry: buildRetry, swallow: buildSwallow, order: buildOrder };
+const EXTRAS = { retry: buildRetry, provider: buildProvider };
 
 // ---- the scene ----
 
@@ -471,7 +407,6 @@ Deck.scene('timeout', (root, args, ctx) => {
   const chart = makeChart(root, geo);
 
   drawGround(chart);
-  if (run.scope) drawScope(chart, run.scope);
   if (run.ghost) drawGhost(chart, run.ghost);
   drawDeadline(chart);
   drawAxis(chart);
@@ -479,7 +414,7 @@ Deck.scene('timeout', (root, args, ctx) => {
   for (const lane of Object.keys(LANE_NAMES)) laneName(chart.axis, geo, lane, LANE_NAMES[lane]);
 
   const spans = run.spans.map(span => makeSpan(chart, span));
-  const events = run.events.map(entry => makeEvent(chart, entry, run.labelGap || 0));
+  const events = run.events.map(entry => makeEvent(chart, entry));
   const timed = [...events];
   if (run.interrupt) timed.push(makeInterrupt(chart, run.interrupt));
   if (run.stop) timed.push(makeStop(chart, run.stop, 'task', 'is-ok'));
