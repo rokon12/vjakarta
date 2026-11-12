@@ -54,6 +54,10 @@ class StoryTest(unittest.TestCase):
         label = re.search(r"class: 'sub', x: 0, y: 204, text: '([^']+)'", overload).group(1)
         self.assertLessEqual(len(label), len('requests / second'))
 
+    def test_the_browser_tab_names_this_talk(self):
+        title = re.search(r'<title>([^<]+)</title>', DECK).group(1)
+        self.assertEqual('Virtual Threads Removed the Thread Limit. What Breaks Next in Jakarta EE?', title)
+
 
 if __name__ == '__main__':
     unittest.main()
