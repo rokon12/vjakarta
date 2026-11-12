@@ -9,7 +9,7 @@ OUT = pathlib.Path(__file__).resolve().parent.parent / 'slides'
 TOKEN = re.compile(
     r'(?P<s>"[^"]*")'
     r'|(?P<c>//.*$)'
-    r'|(?P<k>\b(?:private|final|new|void|if|return|try|finally|catch|throw|throws|synchronized|boolean|var|this)\b)'
+    r'|(?P<k>\b(?:public|private|final|new|void|if|else|return|try|finally|catch|throw|throws|synchronized|boolean|var|this|class|extends|instanceof|int)\b)'
     r'|(?P<n>\b\d+\b)'
 )
 
@@ -24,7 +24,7 @@ def paint(text):
     return ''.join(out)
 
 
-def code(lines, style=''):
+def code(lines, style='', source=None):
     """lines: (text, options). options: step (whole line turns bold at that step),
     hl (substring to highlight, or True for the whole line), hlstep, free (outline, not marker)."""
     rows = []
@@ -44,9 +44,11 @@ def code(lines, style=''):
             body_html = paint(body)
         step = f' data-step="{opt["step"]}"' if 'step' in opt else ''
         cls = 'ln add' if opt.get('add') else 'ln'
-        rows.append(f'<div class="{cls}"{step}><i>{n}</i>{" " * indent}{body_html}</div>')
+        gone = ' style="text-decoration:line-through;text-decoration-thickness:4px;color:var(--ink-2)"' if opt.get('gone') else ''
+        rows.append(f'<div class="{cls}"{step}{gone}><i>{n}</i>{" " * indent}{body_html}</div>')
     attr = f' style="{style}"' if style else ''
-    return f'<div class="code"{attr}>' + ''.join(rows) + '</div>'
+    cited = f' data-source="{source}"' if source else ''
+    return f'<div class="code"{attr}{cited}>' + ''.join(rows) + '</div>'
 
 
 def cue(command, step=None, small=False):
@@ -68,291 +70,285 @@ def circle(n, cx, cy, path, step):
             f'<text x="{cx}" y="{cy + 15}">{n}</text></g>')
 
 
+APP = 'src/main/java/ca/bazlur/tickets/'
+
+
+def at(*refs):
+    return ' '.join(f'{tag}:{APP}{file}' for tag, file in refs)
+
+
+SWITCH = [
+    '@ApplicationPath("/api")',
+    ('@ManagedExecutorDefinition(name = "…", maxAsync = 16)', {'gone': True}),
+    ('@ManagedExecutorDefinition(name = "…", virtual = true)', {'add': True, 'hl': 'virtual = true'}),
+    'public class TicketsApplication extends Application {',
+    '}',
+]
+SWITCH_SOURCE = at(('before', 'TicketsApplication.java'), ('switched', 'TicketsApplication.java'))
+
 # ---------------------------------------------------------------- opening
 
-slide('01-title.html', 'title', 'title', 'The chaos and fun of virtual threads', 'Intro', 'intro', 0, '''
-  <h1>The chaos and fun<br>of virtual threads</h1>
-  <p class="lede">What actually breaks when you push the limits</p>
+slide('01-title.html', 'title', 'title', 'Virtual threads removed the thread limit', 'Opening', 'opening', 0, '''
+  <h1 style="font-size:186px">Virtual threads removed<br>the thread limit.</h1>
+  <p class="lede">What breaks next in Jakarta EE?</p>
   <div class="scene-box" style="left:110px;top:590px;width:1230px;height:380px" data-scene="titletrace"></div>
   <div class="tblock" style="left:1380px;top:618px;width:440px">
     <div><small>Presented by</small><b>Bazlur Rahman</b></div>
-    <div><small>Conditions</small><b class="s">JDK 25 · three live demos</b></div>
+    <div><small>Conditions</small><b class="s">Jakarta EE 11 · live</b></div>
   </div>
 ''')
 
-slide('02-hands.html', 'hands', 'ask', 'Hands up if', 'Intro', 'intro', 0, '''
-  <h2 class="headline">Hands up if</h2>
+slide('02-hands.html', 'hands', 'ask', 'Type in chat', 'Opening', 'opening', 0.5, '''
+  <h2 class="headline">Type in chat</h2>
   <ol class="rows" style="top:240px">
-    <li><b>1</b><span>you run Java 21 or later in production</span></li>
-    <li data-step="1"><b>2</b><span>virtual threads are switched on</span></li>
-    <li data-step="2"><b>3</b><span>you changed anything else when you switched them on</span></li>
+    <li><b>1</b><span>if you run Java 21 or later in production</span></li>
+    <li data-step="1"><b>2</b><span>if virtual threads are switched on</span></li>
+    <li data-step="2"><b>3</b><span>if you changed anything else when you switched them on</span></li>
   </ol>
   <div class="note" style="left:1010px;top:760px;--tilt:-3deg" data-step="2">that last one is this talk</div>
   <svg class="pen" data-step="2"><path filter="url(#rough)" d="M1000 790 C 930 800, 880 770, 850 716" marker-end="url(#arrow-red)"/></svg>
 ''')
 
-slide('03-one-line.html', 'one-line', 'say', 'Turning them on is one line', 'Intro', 'intro', 1, '''
-  <p class="say">Turning them on<br>is one line.</p>
-  <div class="cond" style="left:110px;top:420px"><span>application.properties</span><b class="mono">spring.threads.virtual.enabled=true</b></div>
-  <p class="body lg" style="top:590px" data-step="1">Three things can go wrong afterwards.</p>
-  <p class="body lg" style="top:690px" data-step="2">None of them looks like <span class="scrib" data-bleed>a bug in code review<svg viewBox="0 0 300 26" preserveAspectRatio="none"><path d="M3 15 C 50 4, 96 24, 150 12 S 250 6, 297 16" fill="none" stroke="#d31f2b" stroke-width="7" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg></span>.</p>
+slide('03-one-line.html', 'one-line', 'code', 'Turning them on is one line', 'Opening', 'opening', 1, f'''
+  <h2 class="headline">Turning them on is one line</h2>
+  {code(SWITCH, source=SWITCH_SOURCE)}
+  <div class="cond" style="left:110px;top:600px" data-step="1"><span>Jakarta Concurrency 3.1</span><b>Jakarta EE 11 · Java 21 or later</b></div>
+  <p class="body lg" style="top:720px" data-step="2">Nothing in this diff looks like <span class="scrib" data-bleed>a bug in code review<svg viewBox="0 0 300 26" preserveAspectRatio="none"><path d="M3 15 C 50 4, 96 24, 150 12 S 250 6, 297 16" fill="none" stroke="#d31f2b" stroke-width="7" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg></span>.</p>
 ''')
 
-slide('04-plan.html', 'plan', 'rows', 'One service, three ways to break it', 'Intro', 'intro', 2, '''
-  <h2 class="headline sm">One small service, three ways to break it</h2>
+slide('04-plan.html', 'plan', 'rows', 'One service, two sales, one rebuild', 'Opening', 'opening', 2, '''
+  <h2 class="headline sm">One service, two sales, one rebuild</h2>
   <ol class="rows" style="top:226px">
-    <li><b>1</b><span>The database slows down<small>Every request gets a thread. The pool behind them has eight connections.</small></span></li>
-    <li data-step="1"><b>2</b><span>Requests run one at a time<small>A card is charged while a lock is held.</small></span></li>
-    <li data-step="2"><b>3</b><span>Work continues after a timeout<small>The customer is told it failed. The work carries on.</small></span></li>
+    <li><b>1</b><span>The small sale<small>Sixteen platform threads struggle. Virtual threads fix it.</small></span></li>
+    <li data-step="1"><b>2</b><span>The big sale<small>700 reservations a second. Now it breaks.</small></span></li>
+    <li data-step="2"><b>3</b><span>The rebuild<small>Write the limits down.</small></span></li>
+    <li data-step="3"><b>4</b><span>Deadlines<small>The customer gave up. Stop the work, and don’t charge twice.</small></span></li>
   </ol>
-  <div class="cond" style="left:110px;top:760px" data-step="3"><span>Method</span><b>break it · read what it prints · fix it</b></div>
-  <div class="cond" style="left:110px;top:856px" data-step="3"><span>Every demo</span><b><span class="mono">java File.java</span> · no build, no framework</b></div>
+  <div class="cond" style="left:110px;top:900px" data-step="4"><span>Every run</span><b>k6 · the same load · the same laptop · measured, not drawn</b></div>
 ''')
 
-# ---------------------------------------------------------------- primer
+# ---------------------------------------------------------------- the switch
 
-slide('07-intro-ask.html', 'intro-ask', 'say', 'A thousand requests', 'Primer', 'primer', 6, f'''
-  <p class="say">1,000 requests.<br>Each waits 100 ms.</p>
-  <div class="tblock meter" style="left:110px;top:440px;width:800px">
-    <div><small>50 platform threads</small><b><span class="q">?</span> ms</b></div>
-  </div>
-  <div class="tblock meter" style="left:1020px;top:440px;width:800px" data-step="1">
-    <div><small>One virtual thread each</small><b><span class="q">?</span> ms</b></div>
-  </div>
-  {cue('./run.sh intro', step=1)}
+slide('09-before-run.html', 'before-run', 'say', 'The small sale on sixteen threads', 'The switch', 'switch', 7.5, f'''
+  <p class="say">A small sale.<br>Sixteen platform threads.</p>
+  <p class="body lg" style="top:420px">60 reservations a second, then 120 more a second for 6 seconds.</p>
+  <p class="say md" style="top:580px" data-step="1"><em>Watch p99.</em></p>
+  {cue('./run.sh load before small', step=1)}
 ''')
 
-slide('09-cheated.html', 'cheated', 'say', 'And I cheated', 'Primer', 'primer', 9, '''
-  <p class="say xl">And I cheated.</p>
-  <p class="body lg" style="top:330px;width:1500px" data-step="1">My database took a thousand queries at once without blinking.</p>
-  <p class="say" style="top:560px" data-step="1"><em>Yours won’t.</em></p>
+slide('10-switch.html', 'switch', 'code', 'The switch', 'The switch', 'switch', 9, f'''
+  <h2 class="headline">The switch</h2>
+  {code(SWITCH, source=SWITCH_SOURCE)}
+  <div class="note" style="left:1000px;top:590px;--tilt:-2deg" data-step="1">the advice:<br>never pool virtual threads</div>
+  <div class="cond" style="left:110px;top:620px" data-step="2"><span>Then</span><b>the same small sale</b></div>
+  {cue('./run.sh state switched', step=2)}
 ''')
 
-# ---------------------------------------------------------------- demo 1
-
-slide('10-demo1.html', 'demo1', 'section', 'Demo 1: the database slows down', 'Demo 1', 'demo1', 10, '''
-  <div class="exp"><small>Demo</small>1</div>
-  <h2>The database<br>slows down</h2>
-  <p class="body" style="top:560px;width:1080px">200 requests a second.<br>8 database connections.<br>20 ms a query.</p>
+slide('12-big-ask.html', 'big-ask', 'say', 'The launch', 'The switch', 'switch', 12, f'''
+  <p class="say">The launch.<br>700 a second.</p>
+  <p class="body lg" style="top:420px">The same service, the same switch. For three seconds.</p>
+  <p class="say md" style="top:580px" data-step="1"><em>What happens to p99?</em></p>
+  {cue('./run.sh load switched big', step=1)}
 ''')
 
-slide('12-demo1-ask.html', 'demo1-ask', 'say', 'How long is the service slow?', 'Demo 1', 'demo1', 12, f'''
-  <p class="say">The database gets<br>four times slower<br>for three seconds.</p>
-  <p class="say md" style="top:580px" data-step="1"><em>How long is the service slow?</em></p>
-  {cue('./run.sh overload', step=1)}
-''')
+# ---------------------------------------------------------------- where it moved
 
-slide('14-demo1-why.html', 'demo1-why', 'rows', 'The pool was your limit', 'Demo 1', 'demo1', 16, '''
-  <h2 class="headline">The pool was your limit</h2>
+slide('15-why.html', 'why', 'rows', 'Sixteen threads were your limit', 'Where it moved', 'moved', 17, '''
+  <h2 class="headline">Sixteen threads were your limit</h2>
   <ol class="rows tight" style="top:226px">
-    <li><b>200</b><span>platform threads: at most 200 requests inside<small>An accident, but a limit.</small></span></li>
-    <li data-step="1"><b class="da" style="font-size:150px;padding-top:0">∞</b><span>virtual threads: every request gets in and parks on the pool<small>Parked threads are almost free, so nothing pushes back.</small></span></li>
+    <li><b>16</b><span>platform threads: at most 16 seat holds and payments at once<small>An accident, but a limit.</small></span></li>
+    <li data-step="1"><b class="da" style="font-size:150px;padding-top:0">∞</b><span>virtual threads: every reservation starts all five at once<small>Parked threads are almost free, so nothing pushes back.</small></span></li>
   </ol>
-  <div class="cond" style="left:110px;top:560px" data-step="2"><span>HikariCP</span><b>a request waits up to 30 s for a free connection</b></div>
-  <p class="say sm" style="top:672px" data-step="3">A semaphore limits how many run.<br>It does not limit how many <em>wait</em>.</p>
+  <div class="cond" style="left:110px;top:600px" data-step="2"><span>20 connections</span><b>829 reservations in flight queue for them</b></div>
+  <p class="say sm" style="top:712px" data-step="3">The limit protected the database and the provider.<br>Nobody wrote it down.</p>
 ''')
 
-slide('15-demo1-fix.html', 'demo1-fix', 'code', 'The fix: say no at the door', 'Demo 1', 'demo1', 19, f'''
-  <h2 class="headline">The fix: say no at the door</h2>
-  {code([
-      ('private final Semaphore admission = new Semaphore(32);', {'hl': True, 'hlstep': 1, 'step': 1}),
-      '',
-      'private void handle() {',
-      ('    if (!admission.tryAcquire()) {', {'hl': True, 'hlstep': 2, 'step': 2}),
-      ('        rejected.incrementAndGet();', {'hl': True, 'hlstep': 2, 'step': 2}),
-      ('        return;', {'hl': True, 'hlstep': 2, 'step': 2}),
-      ('    }', {'hl': True, 'hlstep': 2, 'step': 2}),
-      '    try {',
-      '        reserve();',
-      '    } finally {',
-      ('        admission.release();', {'hl': True, 'hlstep': 3, 'step': 3}),
-      '    }',
-      '}',
-  ])}
-  <svg class="pen">
-    {circle(1, 1484, 264, 'M1406 264 H1450', 1)}
-    {circle(2, 1104, 513, 'M1010 410 h18 v206 h-18 M1028 513 H1070', 2)}
-    {circle(3, 934, 824, 'M854 824 H900', 3)}
-  </svg>
-  <div class="note" style="left:1530px;top:240px;--tilt:-2deg" data-step="1">32 inside,<br>no more</div>
-  <div class="note" style="left:1150px;top:466px;--tilt:-2deg" data-step="2">no permit?<br>turn it away, fast</div>
-  <div class="note" style="left:980px;top:776px;--tilt:-2deg" data-step="3">always<br>hand it back</div>
-  <div class="cond" style="left:760px;top:632px" data-step="4"><span>Why 32</span><b>8 running + 24 waiting ≈ 330 ms</b></div>
-  {cue('./run.sh bounded', step=4)}
-''', steps=4)
+slide('16-storm.html', 'storm', 'rows', '@Retry was always there', 'Where it moved', 'moved', 18.5, '''
+  <h2 class="headline">@Retry was always there</h2>
+  <ol class="rows tight" style="top:226px">
+    <li style="grid-template-columns:300px 1fr"><b>4,939</b><span>charges the provider refused<small>It takes 20 at a time.</small></span></li>
+    <li data-step="1" style="grid-template-columns:300px 1fr"><b>4,000</b><span>retries, each one more load on it<small>The MicroProfile defaults: 3 retries.</small></span></li>
+    <li data-step="2" style="grid-template-columns:300px 1fr"><b class="red">939</b><span>customers whose payment failed anyway</span></li>
+  </ol>
+  <div class="note" style="left:1260px;top:300px;--tilt:-3deg" data-step="3">it never fired<br>before the switch</div>
+''')
 
-slide('18-check1.html', 'check1', 'check', 'Check 1', 'Demo 1', 'demo1', 23.5, '''
+slide('17-check1.html', 'check1', 'check', 'Check 1', 'Where it moved', 'moved', 20, '''
   <div class="stamp blue" style="left:110px;top:110px;--tilt:-3deg">Check 1</div>
   <p class="q">For every pool, quota or downstream call: what limits how many requests can <em>wait</em> for it?</p>
 ''')
 
-# ---------------------------------------------------------------- demo 2
+# ---------------------------------------------------------------- the rebuild
 
-slide('19-demo2.html', 'demo2', 'section', 'Demo 2: requests run one at a time', 'Demo 2', 'demo2', 24, '''
-  <div class="exp"><small>Demo</small>2</div>
-  <h2>Requests run<br>one at a time</h2>
-  <p class="body" style="top:560px;width:1080px">40 seats.<br>50 customers at the same moment.<br>80 ms to charge a card.</p>
+slide('18-rebuild.html', 'rebuild', 'section', 'The rebuild', 'The rebuild', 'rebuild', 21, '''
+  <div class="exp"><small>Part</small>2</div>
+  <h2>The rebuild</h2>
+  <p class="body" style="top:560px;width:1080px">Write the limits down.<br>A door in front.<br>A budget behind it for each dependency.</p>
 ''')
 
-slide('20-demo2-ask.html', 'demo2-ask', 'code', 'One lock around everything', 'Demo 2', 'demo2', 26, f'''
-  <h2 class="headline">It must never oversell</h2>
+slide('19-door-code.html', 'door-code', 'code', 'A door: at most 24 inside', 'The rebuild', 'rebuild', 21.5, f'''
+  <h2 class="headline">A door: at most 24 inside</h2>
   {code([
-      ('synchronized boolean reserve() {', {'hl': 'synchronized'}),
-      '    if (seats == 0) return false;',
-      ('    chargeCard();', {'hl': True, 'free': True}),
-      '    seats--;',
-      '    return true;',
-      '}',
-  ])}
-  <svg class="pen"><path filter="url(#rough)" d="M560 376 H640"/></svg>
-  <div class="note" style="left:660px;top:346px;--tilt:-2deg">80 ms at the payment provider</div>
-  <p class="say md" style="top:640px" data-step="1">50 virtual threads, 80 ms each.<br><em>How long?</em></p>
-  {cue('./run.sh wide', step=1)}
-''')
-
-slide('23-demo2-fix.html', 'demo2-fix', 'code', 'The fix: charge outside the lock', 'Demo 2', 'demo2', 32, f'''
-  <h2 class="headline sm">The fix: charge outside the lock</h2>
-  {code([
-      'boolean reserve() throws InterruptedException {',
-      ('    synchronized (this) {', {'hl': True, 'hlstep': 1, 'step': 1}),
-      ('        if (seats == 0) return false;', {'hl': True, 'hlstep': 1, 'step': 1}),
-      ('        seats--;', {'hl': True, 'hlstep': 1, 'step': 1}),
-      ('    }', {'hl': True, 'hlstep': 1, 'step': 1}),
-      '    try {',
-      ('        chargeCard();', {'hl': True, 'hlstep': 2, 'step': 2, 'free': True}),
-      '    } catch (Exception e) {',
-      ('        synchronized (this) { seats++; }', {'hl': True, 'hlstep': 3, 'step': 3}),
-      ('        throw e;', {'step': 3}),
+      ('@ConfigProperty(name = "door.limit")', {'hl': '"door.limit"', 'hlstep': 1, 'step': 1}),
+      'int limit;',
+      '…',
+      'public void filter(ContainerRequestContext request) {',
+      ('    if (inside.tryAcquire()) {', {'hl': 'inside.tryAcquire()', 'hlstep': 2, 'step': 2}),
+      '        request.setProperty("inside", true);',
+      '    } else {',
+      '        refused.inc();',
+      ('        request.abortWith(Response.status(SERVICE_UNAVAILABLE)…);', {'hl': True, 'hlstep': 2, 'step': 2}),
       '    }',
-      '    return true;',
       '}',
-  ])}
-  <svg class="pen">
-    {circle(1, 1142, 403, 'M1048 300 h18 v206 h-18 M1066 403 H1108', 1)}
-    {circle(2, 780, 600, 'M700 600 H746', 2)}
-    {circle(3, 1186, 712, 'M1110 712 H1152', 3)}
-  </svg>
-  <div class="note" style="left:1190px;top:356px;--tilt:-2deg" data-step="1">take the seat:<br>microseconds under a lock</div>
-  <div class="note" style="left:828px;top:574px;--tilt:-2deg" data-step="2">80 ms, no lock held</div>
-  <div class="note" style="left:1234px;top:664px;--tilt:-2deg" data-step="3">a narrow lock<br>needs an undo</div>
-  {cue('./run.sh narrow', step=4)}
+      '…',
+      ('        inside.release();', {'hl': True, 'hlstep': 3, 'step': 3}),
+  ], source=at(('budgeted', 'Door.java')))}
+  <div class="note" style="left:1240px;top:236px;--tilt:-2deg" data-step="1">24, from config</div>
+  <div class="note" style="left:1420px;top:770px;--tilt:-2deg" data-step="2">no room?<br>503, at once</div>
+  <div class="note" style="left:1010px;top:900px;--tilt:-2deg" data-step="3">on the way out</div>
+  <div class="note" style="left:1395px;top:410px;--tilt:-2deg" data-step="4">why 24? 360 a second<br>× 52 ms ≈ 19 inside</div>
 ''', steps=4)
 
-slide('25-demo2-hides.html', 'demo2-hides', 'rows', 'Where it hides', 'Demo 2', 'demo2', 36, '''
-  <h2 class="headline">Where it hides</h2>
-  <ol class="rows tight" style="top:226px">
-    <li><b>1</b><span>a <code>synchronized</code> cache loader that calls the database</span></li>
-    <li data-step="1"><b>2</b><span>a token refresh under a lock</span></li>
-    <li data-step="2"><b>3</b><span>a row lock held across an HTTP call</span></li>
-  </ol>
-  <p class="body" style="top:650px;width:1700px" data-step="3">With 200 threads you may never have noticed.<br>With a thread per request, <span class="red">the lock is the only queue left</span>.</p>
-''')
-
-slide('26-check2.html', 'check2', 'check', 'Check 2', 'Demo 2', 'demo2', 37, '''
-  <div class="stamp blue" style="left:110px;top:110px;--tilt:-3deg">Check 2</div>
-  <p class="q">Is any lock held across a <em>database or network call</em>?</p>
-''')
-
-# ---------------------------------------------------------------- demo 3
-
-slide('27-demo3.html', 'demo3', 'section', 'Demo 3: work continues after a timeout', 'Demo 3', 'demo3', 38, '''
-  <div class="exp"><small>Demo</small>3</div>
-  <h2>Work continues<br>after a timeout</h2>
-  <p class="body" style="top:560px;width:1080px">The payment provider has a bad day:<br>1,800 ms an answer.<br>We wait 200.</p>
-''')
-
-slide('28-demo3-ask.html', 'demo3-ask', 'code', 'We wait 200 ms', 'Demo 3', 'demo3', 40, f'''
-  <h2 class="headline">We won’t make them wait</h2>
+slide('21-budgets-code.html', 'budgets-code', 'code', 'maxAsync is back, as a budget', 'The rebuild', 'rebuild', 26, f'''
+  <h2 class="headline">maxAsync is back, as a budget</h2>
   {code([
-      'Future<String> reservation = executor.submit(this::reserve);',
-      'try {',
-      ('    log(reservation.get(200, MILLISECONDS));', {'hl': 'get(200, MILLISECONDS)'}),
-      '} catch (TimeoutException e) {',
-      '    log("timed out, customer told to try again");',
-      '}',
-  ])}
-  <p class="say md" style="top:652px" data-step="1"><em>What happens to the payment?</em></p>
-  {cue('./run.sh leak', step=1)}
+      ('@ManagedExecutorDefinition(name = "…/seat-holds", …, maxAsync = 20)', {'hl': 'maxAsync = 20', 'hlstep': 1, 'step': 1}),
+      ('@ManagedExecutorDefinition(name = "…/payments", …, maxAsync = 20)', {'hl': 'maxAsync = 20', 'hlstep': 2, 'step': 2}),
+      'public class TicketsApplication extends Application {',
+      '…',
+      '        .mapToObj(seat -> seatHoldExecutor.runAsync(…));',
+      'var payment = paymentExecutor.runAsync(…);',
+  ], source=at(('budgeted', 'TicketsApplication.java'), ('budgeted', 'Reservations.java')))}
+  <div class="note" style="left:1150px;top:640px;--tilt:-2deg" data-step="1">seat holds:<br>the pool has 20</div>
+  <div class="note" style="left:1500px;top:640px;--tilt:-2deg" data-step="2">payments:<br>the provider takes 20</div>
+  <div class="cond" style="left:110px;top:600px" data-step="3"><span>Same attribute</span><b>now it is a budget, not a thread count</b></div>
+  {cue('./run.sh state budgeted', step=3)}
 ''')
 
-slide('30-demo3-fix.html', 'demo3-fix', 'code', 'The fix: cancel the work', 'Demo 3', 'demo3', 45, f'''
+slide('23-result.html', 'result', 'say', 'Saying no to 991 people', 'The rebuild', 'rebuild', 30.5, '''
+  <p class="say">Saying no to 991 people<br>got 1,080 more a fast yes.</p>
+  <p class="say md" style="top:520px" data-step="1"><em>And nobody’s payment failed.</em></p>
+''')
+
+slide('24-check2.html', 'check2', 'check', 'Check 2', 'The rebuild', 'rebuild', 32, '''
+  <div class="stamp blue" style="left:110px;top:110px;--tilt:-3deg">Check 2</div>
+  <p class="q">Is every limit a number you <em>chose from a dependency</em>, or one left over from a thread pool?</p>
+''')
+
+# ---------------------------------------------------------------- deadlines
+
+slide('25-deadlines.html', 'deadlines', 'section', 'Deadlines', 'Deadlines', 'deadlines', 33, '''
+  <div class="exp"><small>Part</small>3</div>
+  <h2>Deadlines</h2>
+  <p class="body" style="top:560px;width:1080px">The provider has a bad day:<br>1,800 ms a charge.<br>The customer waits 500.</p>
+''')
+
+slide('26-deadline-code.html', 'deadline-code', 'code', 'We answer at 500 ms', 'Deadlines', 'deadlines', 33.5, f'''
+  <h2 class="headline">We answer at 500 ms</h2>
+  {code([
+      'return CompletableFuture.allOf(parts)',
+      ('        .orTimeout(deadlineMillis, MILLISECONDS)', {'hl': 'orTimeout(deadlineMillis, MILLISECONDS)'}),
+      '        .whenComplete((done, failure) -> {',
+      '            if (failure instanceof TimeoutException) {',
+      '                trace(started, "timed out, customer told to try again");',
+      '            }',
+      '        })',
+      '        .thenApply(done -> new Reservation(id, request.seats()));',
+  ], source=at(('leak', 'Reservations.java')))}
+  <p class="say md" style="top:770px" data-step="1"><em>What happens to the payment?</em></p>
+''')
+
+slide('28-cancel-code.html', 'cancel-code', 'code', 'The fix: cancel the work', 'Deadlines', 'deadlines', 35.5, f'''
   <h2 class="headline">The fix: cancel the work</h2>
   {code([
-      'try {',
-      '    log(reservation.get(200, MILLISECONDS));',
-      '} catch (TimeoutException e) {',
-      '    log("timed out, customer told to try again");',
-      ('    reservation.cancel(true);', {'hl': True, 'hlstep': 1, 'step': 1}),
-      '}',
-  ])}
-  <svg class="pen">{circle(1, 950, 488, 'M874 488 H916', 1)}</svg>
-  <div class="note" style="left:998px;top:462px;--tilt:-2deg" data-step="1">one line: interrupt the task</div>
-  <div class="cond" style="left:110px;top:640px" data-step="2"><span>Works when</span><b>the task is blocked: a sleep, a socket read, a lock wait</b></div>
-  <div class="cond" style="left:110px;top:736px" data-step="2"><span>Fails when</span><b>the task swallows the interrupt, or never blocks</b></div>
-  {cue('./run.sh cancel', step=2)}
+      '        .whenComplete((done, failure) -> {',
+      '            if (failure instanceof TimeoutException) {',
+      '                trace(started, "timed out, customer told to try again");',
+      ('                Stream.of(parts).forEach(part -> part.cancel(true));', {'add': True, 'hl': 'part.cancel(true)', 'hlstep': 1, 'step': 1}),
+      '            }',
+      '        })',
+  ], source=at(('cancel', 'Reservations.java')))}
+  <div class="note" style="left:1380px;top:470px;--tilt:-2deg" data-step="1">interrupt every part</div>
+  <div class="cond" style="left:110px;top:600px" data-step="2"><span>On Liberty</span><b>cancel(true) on a managed CompletableFuture interrupts the task</b></div>
+  <div class="cond" style="left:110px;top:696px" data-step="2"><span>Plain JDK</span><b>CompletableFuture.cancel does not interrupt anything</b></div>
 ''')
 
-slide('32-demo3-scope.html', 'demo3-scope', 'code', 'Better: the scope owns the deadline', 'Demo 3', 'demo3', 48, f'''
-  <h2 class="headline sm">Better: the scope owns the deadline</h2>
+slide('30-key.html', 'key', 'code', 'Charge each reservation once', 'Deadlines', 'deadlines', 37, f'''
+  <h2 class="headline">Charge each reservation once</h2>
+  {code([
+      ('…reserve(… request, @HeaderParam("Idempotency-Key") UUID key) {', {'hl': '@HeaderParam("Idempotency-Key")'}),
+      '…',
+      ('….header("Idempotency-Key", reservation);', {'hl': 'header("Idempotency-Key", reservation)'}),
+  ], source=at(('deadlines', 'ReservationResource.java'), ('deadlines', 'Payments.java')))}
+  <div class="cond" style="left:110px;top:460px"><span>No key</span><b>the retry is a new reservation: 2 charges, 8 seat holds</b></div>
+  <div class="cond" style="left:110px;top:556px" data-step="1"><span>With the key</span><b>the retry finds the first charge: 201 in 0.026 s, 4 seat holds</b></div>
+  <div class="stamp green" style="right:170px;top:700px;--tilt:-6deg;font-size:110px" data-step="2">Charged once</div>
+''')
+
+slide('31-scope.html', 'scope', 'code', 'Where this is going: the scope owns the deadline', 'Deadlines', 'deadlines', 38, f'''
+  <h2 class="headline sm">Where this is going: the scope owns the deadline</h2>
   {code([
       'try (var scope = StructuredTaskScope.open(',
       '        Joiner.awaitAllSuccessfulOrThrow(),',
-      ('        config -> config.withTimeout(Duration.ofMillis(200)))) {', {'hl': 'config.withTimeout(Duration.ofMillis(200))', 'hlstep': 1, 'step': 1}),
-      ('    var reservation = scope.fork(this::reserve);', {'hl': 'scope.fork(this::reserve)', 'hlstep': 2, 'free': True, 'step': 2}),
-      ('    scope.join();', {'hl': 'scope.join()', 'hlstep': 2, 'free': True, 'step': 2}),
+      ('        config -> config.withTimeout(Duration.ofMillis(200)))) {', {'hl': 'config.withTimeout(Duration.ofMillis(200))'}),
+      '    var reservation = scope.fork(this::reserve);',
+      '    scope.join();',
       '    log(reservation.get());',
       '} catch (StructuredTaskScope.TimeoutException e) {',
       '    log("timed out, customer told to try again");',
       '}',
   ])}
-  <div class="note" style="left:1250px;top:250px;--tilt:-2deg" data-step="1">the deadline lives<br>on the scope</div>
-  <div class="note" style="left:1300px;top:476px;font-size:44px;--tilt:-2deg" data-step="2">nothing leaves the scope<br>while its work is running</div>
-  <div class="cond" style="left:110px;top:800px" data-step="3"><span>Preview API</span><b>JDK 25 · JEP 505 · <span class="mono">--enable-preview</span></b></div>
-  {cue('./run.sh structured', step=3)}
+  <div class="cond" style="left:110px;top:760px" data-step="1"><span>Preview API</span><b>JDK 25 · JEP 505 · plain Java, not in Liberty yet</b></div>
+  <p class="caption" data-step="2">Cancelled at 207 ms, reported at 208 ms: the work stops before the customer is told.</p>
 ''')
 
-slide('34-demo3-tieback.html', 'demo3-tieback', 'say', 'The callers left. The work stayed.', 'Demo 3', 'demo3', 50, '''
-  <p class="say">Remember 322<br>requests in flight?</p>
-  <p class="body lg" style="top:420px" data-step="1">Their callers had timeouts too.</p>
-  <p class="say" style="top:560px" data-step="2">The callers left.<br>The work <em>stayed</em>.</p>
-''')
-
-slide('35-check3.html', 'check3', 'check', 'Check 3', 'Demo 3', 'demo3', 50.5, '''
+slide('32-check3.html', 'check3', 'check', 'Check 3', 'Deadlines', 'deadlines', 38.5, '''
   <div class="stamp blue" style="left:110px;top:110px;--tilt:-3deg">Check 3</div>
-  <p class="q">When a timeout fires, does anything <em>stop the work</em>, and does the work respond to interruption?</p>
+  <p class="q">When a timeout fires, does anything <em>stop the work</em>, and is the retry <em>safe to run twice</em>?</p>
 ''')
 
 # ---------------------------------------------------------------- wrap
 
-slide('36-jobs.html', 'jobs', 'rows', 'Threads got free. Nothing else did.', 'Wrap', 'wrap', 51, '''
-  <p class="say md">Threads got free.<br>Nothing else did.</p>
-  <p class="body" style="top:372px">The thread pool was doing three jobs nobody gave it:</p>
-  <ol class="rows tight" style="top:470px">
-    <li data-step="1"><b>1</b><span>limiting load on the database</span></li>
-    <li data-step="2"><b>2</b><span>hiding wide locks</span></li>
-    <li data-step="3"><b>3</b><span>capping how much abandoned work could pile up</span></li>
+slide('33-watch-list.html', 'watch-list', 'rows', 'What to watch', 'Wrap', 'wrap', 39, '''
+  <h2 class="headline">What to watch</h2>
+  <ol class="rows tight" style="top:200px">
+    <li><b>1</b><span>Requests in flight<small>829 at the big sale. 24 behind the door.</small></span></li>
+    <li data-step="1"><b>2</b><span>Waits for a connection<small>9,061 in one big sale.</small></span></li>
+    <li data-step="2"><b>3</b><span>Retries<small>4,000: each one is more load.</small></span></li>
+    <li data-step="3"><b>4</b><span>Refusals: the 429s you get, the 503s you give<small>4,939 from the provider. 991 from the door.</small></span></li>
+    <li data-step="4"><b>5</b><span>p99, second by second<small>An average over the run hides a sale.</small></span></li>
   </ol>
-  <div class="stamp red" style="right:150px;top:560px;--tilt:-7deg;font-size:110px" data-step="4">Yours now</div>
 ''')
 
-slide('37-checks.html', 'checks', 'rows', 'Three checks to take home', 'Wrap', 'wrap', 52, '''
+slide('34-checks.html', 'checks', 'rows', 'Three checks to take home', 'Wrap', 'wrap', 40.5, '''
   <h2 class="headline">Three checks to take home</h2>
   <ol class="rows checks" style="top:226px">
     <li><b>1</b><span>For every pool, quota or downstream call: what limits how many requests can <em>wait</em> for it?</span></li>
-    <li><b>2</b><span>Is any lock held across a <em>database or network call</em>?</span></li>
-    <li><b>3</b><span>When a timeout fires, does anything <em>stop the work</em>, and does the work respond to interruption?</span></li>
+    <li><b>2</b><span>Is every limit a number you <em>chose from a dependency</em>, or one left over from a thread pool?</span></li>
+    <li><b>3</b><span>When a timeout fires, does anything <em>stop the work</em>, and is the retry <em>safe to run twice</em>?</span></li>
   </ol>
 ''')
 
-slide('38-thanks.html', 'thanks', 'say', 'Thank you', 'Wrap', 'wrap', 54, '''
+slide('35-jobs.html', 'jobs', 'rows', 'Threads got free. Nothing else did.', 'Wrap', 'wrap', 41.5, '''
+  <p class="say md">Threads got free.<br>Nothing else did.</p>
+  <p class="body" style="top:372px">Sixteen threads were doing three jobs nobody gave them:</p>
+  <ol class="rows tight" style="top:470px">
+    <li data-step="1"><b>1</b><span>keeping the database under its 20 connections</span></li>
+    <li data-step="2"><b>2</b><span>keeping the provider under its limit, so @Retry never fired</span></li>
+    <li data-step="3"><b>3</b><span>being the one number in the system that said “enough”</span></li>
+  </ol>
+  <div class="stamp red" style="right:150px;top:150px;--tilt:-7deg;font-size:110px" data-step="4">Yours now</div>
+''')
+
+slide('36-thanks.html', 'thanks', 'say', 'Thank you', 'Wrap', 'wrap', 42.5, '''
   <p class="say xl">Thank you.</p>
   <p class="body lg" style="top:300px">Questions?</p>
-  <div class="cond" style="left:110px;top:470px"><span>Code</span><b class="mono">github.com/rokon12/vfun</b></div>
-  <div class="cond" style="left:110px;top:566px"><span>Every demo</span><b><span class="mono">java File.java</span> · JDK 25, no dependencies</b></div>
+  <div class="cond" style="left:110px;top:470px"><span>Code</span><b class="mono">github.com/rokon12/vjakarta</b></div>
+  <div class="cond" style="left:110px;top:566px"><span>Every state</span><b class="mono">./run.sh state before | switched | budgeted | deadlines</b></div>
   <div class="tblock" style="left:110px;top:700px;width:560px">
     <div><small>Presented by</small><b>Bazlur Rahman</b></div>
   </div>
-  <div class="stamp green" style="right:170px;top:330px;--tilt:-6deg;font-size:120px">All 3 fixed</div>
+  <div class="stamp green" style="right:150px;top:150px;--tilt:-6deg;font-size:100px">Limits written down</div>
 ''')
 
 print(f'wrote {len(list(OUT.glob("*.html")))} slide files in total')

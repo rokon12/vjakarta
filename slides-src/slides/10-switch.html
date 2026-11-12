@@ -1,0 +1,7 @@
+<section class="slide" id="switch" data-layout="code" data-title="The switch" data-section="The switch" data-section-key="switch" data-min="9">
+<h2 class="headline">The switch</h2>
+  <div class="code" data-source="before:src/main/java/ca/bazlur/tickets/TicketsApplication.java switched:src/main/java/ca/bazlur/tickets/TicketsApplication.java"><div class="ln"><i>1</i>@ApplicationPath(<span class="s">"/api"</span>)</div><div class="ln" style="text-decoration:line-through;text-decoration-thickness:4px;color:var(--ink-2)"><i>2</i>@ManagedExecutorDefinition(name = <span class="s">"…"</span>, maxAsync = <span class="n">16</span>)</div><div class="ln add"><i>3</i>@ManagedExecutorDefinition(name = <span class="s">"…"</span>, <span class="hl">virtual = true</span>)</div><div class="ln"><i>4</i><span class="k">public</span> <span class="k">class</span> TicketsApplication <span class="k">extends</span> Application {</div><div class="ln"><i>5</i>}</div></div>
+  <div class="note" style="left:1000px;top:590px;--tilt:-2deg" data-step="1">the advice:<br>never pool virtual threads</div>
+  <div class="cond" style="left:110px;top:620px" data-step="2"><span>Then</span><b>the same small sale</b></div>
+  <div class="cue" data-step="2"><div class="h">Next · terminal</div><div class="c">$ ./run.sh state switched<span class="cur"></span></div></div>
+</section>

@@ -1,6 +1,6 @@
-<section class="slide" id="one-line" data-layout="say" data-title="Turning them on is one line" data-section="Intro" data-section-key="intro" data-min="1">
-<p class="say">Turning them on<br>is one line.</p>
-  <div class="cond" style="left:110px;top:420px"><span>application.properties</span><b class="mono">spring.threads.virtual.enabled=true</b></div>
-  <p class="body lg" style="top:590px" data-step="1">Three things can go wrong afterwards.</p>
-  <p class="body lg" style="top:690px" data-step="2">None of them looks like <span class="scrib" data-bleed>a bug in code review<svg viewBox="0 0 300 26" preserveAspectRatio="none"><path d="M3 15 C 50 4, 96 24, 150 12 S 250 6, 297 16" fill="none" stroke="#d31f2b" stroke-width="7" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg></span>.</p>
+<section class="slide" id="one-line" data-layout="code" data-title="Turning them on is one line" data-section="Opening" data-section-key="opening" data-min="1">
+<h2 class="headline">Turning them on is one line</h2>
+  <div class="code" data-source="before:src/main/java/ca/bazlur/tickets/TicketsApplication.java switched:src/main/java/ca/bazlur/tickets/TicketsApplication.java"><div class="ln"><i>1</i>@ApplicationPath(<span class="s">"/api"</span>)</div><div class="ln" style="text-decoration:line-through;text-decoration-thickness:4px;color:var(--ink-2)"><i>2</i>@ManagedExecutorDefinition(name = <span class="s">"…"</span>, maxAsync = <span class="n">16</span>)</div><div class="ln add"><i>3</i>@ManagedExecutorDefinition(name = <span class="s">"…"</span>, <span class="hl">virtual = true</span>)</div><div class="ln"><i>4</i><span class="k">public</span> <span class="k">class</span> TicketsApplication <span class="k">extends</span> Application {</div><div class="ln"><i>5</i>}</div></div>
+  <div class="cond" style="left:110px;top:600px" data-step="1"><span>Jakarta Concurrency 3.1</span><b>Jakarta EE 11 · Java 21 or later</b></div>
+  <p class="body lg" style="top:720px" data-step="2">Nothing in this diff looks like <span class="scrib" data-bleed>a bug in code review<svg viewBox="0 0 300 26" preserveAspectRatio="none"><path d="M3 15 C 50 4, 96 24, 150 12 S 250 6, 297 16" fill="none" stroke="#d31f2b" stroke-width="7" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg></span>.</p>
 </section>

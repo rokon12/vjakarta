@@ -1,0 +1,6 @@
+<section class="slide" id="scope" data-layout="code" data-title="Where this is going: the scope owns the deadline" data-section="Deadlines" data-section-key="deadlines" data-min="38">
+<h2 class="headline sm">Where this is going: the scope owns the deadline</h2>
+  <div class="code"><div class="ln"><i>1</i><span class="k">try</span> (<span class="k">var</span> scope = StructuredTaskScope.open(</div><div class="ln"><i>2</i>        Joiner.awaitAllSuccessfulOrThrow(),</div><div class="ln"><i>3</i>        config -&gt; <span class="hl">config.withTimeout(Duration.ofMillis(<span class="n">200</span>))</span>)) {</div><div class="ln"><i>4</i>    <span class="k">var</span> reservation = scope.fork(<span class="k">this</span>::reserve);</div><div class="ln"><i>5</i>    scope.join();</div><div class="ln"><i>6</i>    log(reservation.get());</div><div class="ln"><i>7</i>} <span class="k">catch</span> (StructuredTaskScope.TimeoutException e) {</div><div class="ln"><i>8</i>    log(<span class="s">"timed out, customer told to try again"</span>);</div><div class="ln"><i>9</i>}</div></div>
+  <div class="cond" style="left:110px;top:760px" data-step="1"><span>Preview API</span><b>JDK 25 · JEP 505 · plain Java, not in Liberty yet</b></div>
+  <p class="caption" data-step="2">Cancelled at 207 ms, reported at 208 ms: the work stops before the customer is told.</p>
+</section>

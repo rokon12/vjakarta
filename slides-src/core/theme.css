@@ -789,14 +789,14 @@ svg .dc { text-transform: none; }
   left: 520px;
   top: 20px;
   height: 9px;
-  width: calc(var(--min, 0) * 18px);
+  width: calc(var(--min, 0) * 24px);
   background: var(--red);
   transition: width var(--slide-ms) var(--feed);
 }
 
 #chrome .here {
   position: absolute;
-  left: calc(520px + var(--min, 0) * 18px);
+  left: calc(520px + var(--min, 0) * 24px);
   top: 0;
   width: 0;
   height: 0;
@@ -827,7 +827,7 @@ svg .dc { text-transform: none; }
 #chrome .clock {
   display: none;
   position: absolute;
-  left: calc(520px + min(var(--clock-min, 0), 60) * 18px);
+  left: calc(520px + min(var(--clock-min, 0), 45) * 24px);
   top: 26px;
   width: 0;
 }

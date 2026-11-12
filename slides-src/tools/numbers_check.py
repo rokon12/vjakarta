@@ -7,7 +7,8 @@ import sys
 SECTION = re.compile(r'<section\b[^>]*\bid="([^"]+)"[^>]*>(.*?)</section>', re.S)
 HIDDEN = re.compile(r'<(script|style)\b.*?</\1>', re.S)
 TAG = re.compile(r'<[^>]+>')
-NUMBER = re.compile(r'(?<![A-Za-z])\d[\d,]*(?:\.\d+)?(?![A-Za-z])')
+NUMBER = re.compile(r'(?<![A-Za-z\d])\d[\d,]*(?:\.\d+)?(?![A-Za-z\d])')
+GUTTER = re.compile(r'(<div class="ln[^"]*"[^>]*>)<i>\d+</i>')
 FREE = {str(n) for n in range(11)} | {'2025', '2026'}
 
 
@@ -16,7 +17,7 @@ def numbers(text):
 
 
 def visible(body):
-    return html.unescape(TAG.sub(' ', HIDDEN.sub(' ', body)))
+    return html.unescape(TAG.sub(' ', GUTTER.sub(r'\1', HIDDEN.sub(' ', body))))
 
 
 def missing(deck_html, sheet_text):

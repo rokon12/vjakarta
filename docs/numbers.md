@@ -50,6 +50,17 @@ The line: "Same sale. A second at p99 on sixteen threads, seventy milliseconds o
 - With the key: attempt 1 gets 504 after 0.52 s; attempt 2 gets 201 after 0.026 s; the provider charged once and answered "already charged" once; 4 seat holds.
 - `deadlines` under the big sale: p99 92 ms, 2,706 on time, 1,015 turned away, nothing failed.
 
+## Versions
+
+- Java 25 (virtual threads need Java 21 or later), Jakarta EE 11, Jakarta Concurrency 3.1, Open Liberty 26.0.0.11, MicroProfile Fault Tolerance 4.1, k6 1.6.1.
+
+## How the door and the budgets were sized
+
+- The provider charges 20 cards at a time in about 55 ms each (50 ms plus the call), so about 360 a second.
+- A reservation takes about 52 ms (p50), so at full speed about 19 are inside (360 × 0.052).
+- The door is 24, to leave room for bursts.
+- Seat holds: 20 at a time, because the pool has 20 connections. Payments: 20 at a time, because the provider takes 20.
+
 ## Per-second series for the charts
 
 `docs/series/*.json` (one object per second: requests, p50, p99 of the requests let in, and counts of 201, 503 and other): `before-small`, `switched-small`, `switched-big`, `budgeted-big`, `before-big`, `deadlines-big`.

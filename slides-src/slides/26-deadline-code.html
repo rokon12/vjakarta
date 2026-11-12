@@ -1,0 +1,5 @@
+<section class="slide" id="deadline-code" data-layout="code" data-title="We answer at 500 ms" data-section="Deadlines" data-section-key="deadlines" data-min="33.5">
+<h2 class="headline">We answer at 500 ms</h2>
+  <div class="code" data-source="leak:src/main/java/ca/bazlur/tickets/Reservations.java"><div class="ln"><i>1</i><span class="k">return</span> CompletableFuture.allOf(parts)</div><div class="ln"><i>2</i>        .<span class="hl">orTimeout(deadlineMillis, MILLISECONDS)</span></div><div class="ln"><i>3</i>        .whenComplete((done, failure) -&gt; {</div><div class="ln"><i>4</i>            <span class="k">if</span> (failure <span class="k">instanceof</span> TimeoutException) {</div><div class="ln"><i>5</i>                trace(started, <span class="s">"timed out, customer told to try again"</span>);</div><div class="ln"><i>6</i>            }</div><div class="ln"><i>7</i>        })</div><div class="ln"><i>8</i>        .thenApply(done -&gt; <span class="k">new</span> Reservation(id, request.seats()));</div></div>
+  <p class="say md" style="top:770px" data-step="1"><em>What happens to the payment?</em></p>
+</section>

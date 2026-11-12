@@ -1,9 +1,0 @@
-<section class="slide" id="demo2-hides" data-layout="rows" data-title="Where it hides" data-section="Demo 2" data-section-key="demo2" data-min="36">
-<h2 class="headline">Where it hides</h2>
-  <ol class="rows tight" style="top:226px">
-    <li><b>1</b><span>a <code>synchronized</code> cache loader that calls the database</span></li>
-    <li data-step="1"><b>2</b><span>a token refresh under a lock</span></li>
-    <li data-step="2"><b>3</b><span>a row lock held across an HTTP call</span></li>
-  </ol>
-  <p class="body" style="top:650px;width:1700px" data-step="3">With 200 threads you may never have noticed.<br>With a thread per request, <span class="red">the lock is the only queue left</span>.</p>
-</section>

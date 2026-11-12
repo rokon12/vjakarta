@@ -28,6 +28,15 @@ class NumbersCheckTest(unittest.TestCase):
         deck = '<section class="slide" id="f"><p>github.com/rokon12/vjakarta and p99</p></section>'
         self.assertEqual(numbers_check.missing(deck, ""), [])
 
+    def test_a_number_glued_to_a_word_does_not_leave_a_piece_behind(self):
+        deck = '<section class="slide" id="g"><p>the 429s you get</p></section>'
+        self.assertEqual(numbers_check.missing(deck, ""), [])
+
+    def test_code_line_numbers_are_not_numbers_on_the_slide(self):
+        deck = ('<section class="slide" id="h"><div class="code">'
+                '<div class="ln"><i>12</i>refused.inc();</div><div class="ln add"><i>13</i>x</div></div></section>')
+        self.assertEqual(numbers_check.missing(deck, ""), [])
+
     def test_attributes_scripts_and_notes_are_ignored(self):
         deck = ('<section class="slide" id="e" data-args=\'{"limit": 777}\'>'
                 '<script>let x = 888;</script><p>ok</p></section><script>{"e": "999"}</script>')

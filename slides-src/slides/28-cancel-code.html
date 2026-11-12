@@ -1,0 +1,7 @@
+<section class="slide" id="cancel-code" data-layout="code" data-title="The fix: cancel the work" data-section="Deadlines" data-section-key="deadlines" data-min="35.5">
+<h2 class="headline">The fix: cancel the work</h2>
+  <div class="code" data-source="cancel:src/main/java/ca/bazlur/tickets/Reservations.java"><div class="ln"><i>1</i>        .whenComplete((done, failure) -&gt; {</div><div class="ln"><i>2</i>            <span class="k">if</span> (failure <span class="k">instanceof</span> TimeoutException) {</div><div class="ln"><i>3</i>                trace(started, <span class="s">"timed out, customer told to try again"</span>);</div><div class="ln add" data-step="1"><i>4</i>                Stream.of(parts).forEach(part -&gt; <span class="hl" data-step="1">part.cancel(true)</span>);</div><div class="ln"><i>5</i>            }</div><div class="ln"><i>6</i>        })</div></div>
+  <div class="note" style="left:1380px;top:470px;--tilt:-2deg" data-step="1">interrupt every part</div>
+  <div class="cond" style="left:110px;top:600px" data-step="2"><span>On Liberty</span><b>cancel(true) on a managed CompletableFuture interrupts the task</b></div>
+  <div class="cond" style="left:110px;top:696px" data-step="2"><span>Plain JDK</span><b>CompletableFuture.cancel does not interrupt anything</b></div>
+</section>

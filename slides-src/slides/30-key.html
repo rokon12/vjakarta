@@ -1,0 +1,7 @@
+<section class="slide" id="key" data-layout="code" data-title="Charge each reservation once" data-section="Deadlines" data-section-key="deadlines" data-min="37">
+<h2 class="headline">Charge each reservation once</h2>
+  <div class="code" data-source="deadlines:src/main/java/ca/bazlur/tickets/ReservationResource.java deadlines:src/main/java/ca/bazlur/tickets/Payments.java"><div class="ln"><i>1</i>…reserve(… request, <span class="hl">@HeaderParam(<span class="s">"Idempotency-Key"</span>)</span> UUID key) {</div><div class="ln"><i>2</i>…</div><div class="ln"><i>3</i>….<span class="hl">header(<span class="s">"Idempotency-Key"</span>, reservation)</span>;</div></div>
+  <div class="cond" style="left:110px;top:460px"><span>No key</span><b>the retry is a new reservation: 2 charges, 8 seat holds</b></div>
+  <div class="cond" style="left:110px;top:556px" data-step="1"><span>With the key</span><b>the retry finds the first charge: 201 in 0.026 s, 4 seat holds</b></div>
+  <div class="stamp green" style="right:170px;top:700px;--tilt:-6deg;font-size:110px" data-step="2">Charged once</div>
+</section>
