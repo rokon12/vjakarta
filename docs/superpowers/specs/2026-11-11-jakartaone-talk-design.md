@@ -65,7 +65,7 @@ The closing line of the submitted abstract: Rather than asking "How many tasks c
 - **Database:** PostgreSQL 16 in Docker.
 - **Payment provider:** a separate small process (a single plain-Java file using the JDK's HTTP server) with a fixed response time and a fixed capacity. Above capacity it answers 429.
 - **Load:** k6 with an open model (arrival rate, not virtual users), so arrivals do not slow down when the service does. A closed model (fixed virtual users) would hide the p99 explosion and would be dishonest.
-- **The trigger: a flash sale.** Recommended to the speaker, who did not pick between it and vfun's database slowdown; treat it as the designer's call. Steady, evenly spaced load cannot honestly make the switch explode: if the old pool of 16 never fills, removing it changes nothing. So every run, in every state, has the same flash sale: traffic jumps for a few seconds (tickets go on sale), then returns to normal. This fits the reservation domain and hits both the database and the provider.
+- **The trigger: two flash sales.** (Decided by the speaker on November 11, after the spike.) The spike showed that, honestly, the switch makes the service *better* at a sale the old pool could barely take: the pool of 16 was the real bottleneck and the database and the provider had room to spare. So the story follows the abstract's own arc, "faster first, then it breaks": a **small sale** that `before` struggles with and `switched` handles easily, then the **big sale** (the launch) where `switched` breaks. The p99 explosion is compared with `switched` at the small sale a minute earlier, not with `before`. On stage, say plainly that `before` would have been even worse at the big sale. See `docs/spike-results.md`.
 - **Live view of p99:** k6's built-in web dashboard during live runs. The deck's charts are drawn from recorded runs. No Grafana or Prometheus stack.
 - The running order and the schedule below.
 
@@ -81,8 +81,8 @@ The closing line of the submitted abstract: Rather than asking "How many tasks c
 
 ### Four states, one git tag each
 
-1. **`before`:** platform threads, with `maxAsync = 16` on the executor ("sized to 16 years ago"). Healthy under the test load.
-2. **`switched`:** the migration as a team following the usual advice ("never pool virtual threads") would do it: `virtual = true`, `maxAsync` removed. The diff shown on screen is one line. Expected result: p50 gets better (more parallelism), p99 explodes (requests wait for connections up to the default timeout, the provider answers 429, retries multiply the load).
+1. **`before`:** platform threads, with `maxAsync = 16` on the executor ("sized to 16 years ago"). Healthy at normal traffic; at the small sale its queue grows and p99 rises to around a second.
+2. **`switched`:** the migration as a team following the usual advice ("never pool virtual threads") would do it: `virtual = true`, `maxAsync` removed. The diff shown on screen is one line. At the small sale p99 stays near normal: virtual threads delivered. At the big sale p99 explodes: hundreds of requests in flight wait for connections, the provider answers 429, retries pile on, and payments fail.
 3. **`budgeted`:** the limits written down.
    - Admission control at the door: a limit on requests in flight; anything above it is refused at once with 503 and `Retry-After`. This is vfun's "door".
    - A budget per dependency: `maxAsync` comes back with a number derived from the dependencies. It is the same attribute, but now it is a budget, not a thread count. Fan-out per request is bounded. `@Bulkhead` on the provider client matches the provider's capacity.
@@ -95,11 +95,11 @@ The closing line of the submitted abstract: Rather than asking "How many tasks c
 
 The builder tunes the numbers (arrival rate, latencies, limits, fan-out width) and records them. The constraints:
 
-- The same k6 load, flash sale included, in every state.
-- Outside the flash sale, every state is healthy.
-- `before`: during the sale the pool of 16 makes extra requests wait their turn. p99 rises moderately and recovers soon after the sale ends. No 429s, no retries.
-- `switched`: p50 equal to or better than `before`. During the sale everything goes straight to the database and the provider; connection waits grow, the provider answers 429, retries add load. p99 at least ten times `before`, ideally seconds. The strongest honest version keeps p99 high after the sale ends because retries keep the load above capacity; aim for it, but do not force it. If p99 recovers when the sale ends, say so on stage.
-- `budgeted`: refusals (503) only during the sale, quick, counted and shown. p99 of admitted requests stays low throughout and is back to normal as soon as the sale ends. More requests answered on time than in both `before` and `switched`, because the budgets come from the real limits, not from 16 threads. That is what keeps the rebuilt service from looking worse than never switching (vfun's "saying no to 291 people got 440 more a fast yes" pattern).
+- Two loads, the same in every state: normal traffic plus the small sale, and normal traffic plus the big sale.
+- Outside the sales, every state is healthy.
+- `before`: at the small sale p99 rises to around a second and recovers soon after; no 429s, no retries. At the big sale it is far worse than `switched`; measure it once so the speaker can say so.
+- `switched`: at the small sale p99 near normal, no failed payments. At the big sale p99 at least ten times its small-sale p99, ideally seconds, with connection waits, 429s, retries and failed payments visible.
+- `budgeted`: at the small sale as good as `switched`. At the big sale refusals (503) only during the sale, quick, counted and shown; p99 of admitted requests low throughout and normal as soon as the sale ends; no failed payments; more requests answered on time than `switched` (vfun's "saying no to 291 people got 440 more a fast yes" pattern).
 - Reproducible run to run on the speaker's Mac. One run fits in 60 seconds on stage; 30 is better.
 - Every number goes into `slides-src/specs/_numbers.md` as in vfun. Slides quote only measured numbers.
 
@@ -145,8 +145,8 @@ Speaker notes are written in `tools/notes.py` as in vfun, plain English, with a 
 |---|---|---|
 | 0–3 | Title, the promise, the one-line switch as a teaser | Slides |
 | 3–6 | Basics: platform vs. virtual threads, the race | Slides (reused) |
-| 6–9 | Meet the service: its shape and numbers; healthy baseline | Live k6 run |
-| 9–15 | **The switch.** One line, reload, same load: p50 better, p99 explodes | Live, recorded fallback |
+| 6–9 | Meet the service: its shape and numbers; the small sale on platform threads, p99 around a second | Live k6 run |
+| 9–15 | **The switch.** One line, reload, the small sale again: fixed. Then the big sale: p99 explodes | Live, recorded fallback |
 | 15–21 | Where the queue moved: the overload scene, "why didn't this happen before", the retry storm, the metrics | Slides plus one live metrics command |
 | 21–33 | Rebuild with budgets: the door, the `maxAsync` budget and bounded fan-out, the bulkhead, retries. Same load: p99 back down | Slides plus live run, recorded fallback |
 | 33–39 | Timeouts and cancellation | Slides (reused timeout scene) |

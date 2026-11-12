@@ -1,6 +1,6 @@
 import http from 'k6/http';
 
-const base = Number(__ENV.BASE_RATE || 100);
+const base = Number(__ENV.BASE_RATE || 60);
 const sale = Number(__ENV.SALE_RATE || 300);
 const saleSeconds = Number(__ENV.SALE_SECONDS || 3);
 const saleAt = Number(__ENV.SALE_AT || 10);

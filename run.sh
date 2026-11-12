@@ -24,7 +24,11 @@ db() {
 }
 
 load() {
-  local name=${1:?name the run, for example ./run.sh load before}
+  local name=${1:?name the run, for example ./run.sh load before small}
+  case "${2:-small}" in
+    small) export SALE_RATE=${SALE_RATE:-120} SALE_SECONDS=${SALE_SECONDS:-6} ;;
+    big)   export SALE_RATE=${SALE_RATE:-640} SALE_SECONDS=${SALE_SECONDS:-3} ;;
+  esac
   mkdir -p results
   K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_EXPORT="results/$name.html" K6_CSV_TIME_FORMAT=unix_milli \
     run k6 run -q --out csv="results/$name.csv" load/flash-sale.js
@@ -36,6 +40,6 @@ case "$1" in
   reset)    psql -c 'truncate holds' && echo "holds emptied" ;;
   provider) run java -Dlimit="${LIMIT:-20}" -Dmillis="${MILLIS:-50}" provider/PaymentProvider.java ;;
   app)      run mvn -q liberty:dev ;;
-  load)     load "$2" ;;
-  *)        echo "usage: ./run.sh db|reset|provider|app|load <name>" ;;
+  load)     load "$2" "$3" ;;
+  *)        echo "usage: ./run.sh db|reset|provider|app|load <name> small|big" ;;
 esac
