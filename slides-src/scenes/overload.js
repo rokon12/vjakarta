@@ -246,10 +246,11 @@ Deck.scene('overload', (root, args, ctx) => {
   const saleLabel = add('text', { class: 'lbl sm', x: sx(SALE_FROM), y: chart.y - 14, text: 'SALE · 700 A SECOND' });
 
   // readouts
-  function readout(label) {
+  function readout(text) {
     const win = el('span', { class: 'win' });
-    const row = el('div', { class: 'ro' }, [el('span', { class: 'lb', text: label }), win, el('span', { class: 'un', text: '' })]);
-    return { row, win, shown: '' };
+    const label = el('span', { class: 'lb', text });
+    const row = el('div', { class: 'ro' }, [label, win, el('span', { class: 'un', text: '' })]);
+    return { row, win, label, shown: '' };
   }
   const flightOut = readout('In flight');
   const retriesOut = readout('Retries');
@@ -296,6 +297,7 @@ Deck.scene('overload', (root, args, ctx) => {
     const refusing = service.provider.every(Boolean);
     refusedText.textContent = refusing ? 'refusing charges' : 'every charge accepted';
     refusedText.style.fill = refusing ? 'var(--red)' : 'var(--ink-2)';
+    flightOut.label.textContent = 'In flight';
     show(flightOut, service.inFlight, service.inFlight > DOOR ? 'alarm' : '');
     retriesOut.row.style.visibility = 'hidden';
     lastOut.row.style.visibility = 'hidden';
@@ -305,6 +307,7 @@ Deck.scene('overload', (root, args, ctx) => {
     const measured = MEASURED[mode];
     refusedText.textContent = `refused ${Deck.fmt(measured.refused)} charges`;
     refusedText.style.fill = 'var(--red)';
+    flightOut.label.textContent = 'Peak in flight';
     show(flightOut, measured.inFlight, door ? '' : 'alarm');
     show(retriesOut, measured.retries, 'alarm');
     show(lastOut, measured.last, door ? '' : 'alarm');

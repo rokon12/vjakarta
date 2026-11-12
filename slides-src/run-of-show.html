@@ -1,0 +1,915 @@
+<title>JakartaOne Run of Show</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Barlow+Condensed:wght@600;700&family=JetBrains+Mono:wght@400;700&display=swap">
+<style>
+/* Layout: one narrow column, read top to bottom on a phone at the podium.
+   A sticky talk clock, the hour drawn to scale, then one block per segment with a cue for each minute. */
+:root {
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --ink: #17202b;
+  --muted: #566272;
+  --rule: #d3dae2;
+  --now: #a85800;
+  --now-soft: #fbecd3;
+  --on-now: #ffffff;
+  --act: #0a6a72;
+  --act-soft: #dff0f1;
+  --ask: #7a3c8f;
+  --ask-soft: #f0e5f5;
+  --over: #b3261e;
+  --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10161e;
+    --surface: #18212c;
+    --ink: #e9eef4;
+    --muted: #9aa7b6;
+    --rule: #2c3847;
+    --now: #f0b04a;
+    --now-soft: #33280f;
+    --on-now: #1a1305;
+    --act: #5fc6cf;
+    --act-soft: #10323a;
+    --ask: #cf9be0;
+    --ask-soft: #2e1f38;
+    --over: #ff8a80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10161e;
+  --surface: #18212c;
+  --ink: #e9eef4;
+  --muted: #9aa7b6;
+  --rule: #2c3847;
+  --now: #f0b04a;
+  --now-soft: #33280f;
+  --on-now: #1a1305;
+  --act: #5fc6cf;
+  --act-soft: #10323a;
+  --ask: #cf9be0;
+  --ask-soft: #2e1f38;
+  --over: #ff8a80;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+h1, h2, h3, p, ol, ul, dl, dd, pre { margin: 0; }
+ol, ul { padding: 0; list-style: none; }
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: var(--surface);
+}
+
+/* talk clock */
+.clock {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 9;
+  background: var(--surface);
+  border-bottom: 1px solid var(--rule);
+}
+.clock-in {
+  max-width: 40rem;
+  margin-inline: auto;
+  padding-block: 0.5rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.75rem;
+}
+.time {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.75rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--now);
+  margin-right: auto;
+}
+.time.over { color: var(--over); }
+button {
+  font: inherit;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0 0.9rem;
+  cursor: pointer;
+}
+button:focus-visible, input:focus-visible { outline: 2px solid var(--now); outline-offset: 2px; }
+.primary { background: var(--now); border-color: var(--now); color: var(--on-now); font-weight: 700; min-width: 5.5rem; }
+.nowline {
+  flex: 1 1 100%;
+  min-width: 0;
+  min-height: 2rem;
+  text-align: left;
+  padding: 0.2rem 0.6rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* page */
+.wrap {
+  max-width: 40rem;
+  margin-inline: auto;
+  padding-block: 1.5rem 3rem;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  gap: 2rem;
+}
+.wrap > * { min-width: 0; }
+.intro { display: grid; gap: 0.6rem; }
+.eyebrow {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2.75rem;
+  line-height: 1;
+  text-wrap: balance;
+}
+.lede { color: var(--muted); }
+
+/* the hour, to scale: 1% of the width is 0.6 minutes */
+.hour { display: grid; gap: 0; }
+.hour-track { position: relative; }
+.hour-bar { display: flex; height: 2.25rem; border-radius: 0.25rem; overflow: hidden; }
+.hb {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  background: var(--rule);
+  box-shadow: inset -2px 0 0 var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.03em;
+}
+.hb:last-child { box-shadow: none; }
+.hb.demo { background: var(--ink); color: var(--bg); }
+.hour-mark {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 3px;
+  margin-left: -1.5px;
+  border-radius: 2px;
+  background: var(--now);
+}
+.hour-ticks {
+  position: relative;
+  height: 1.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.hour-ticks span { position: absolute; top: 0.3rem; transform: translateX(-50%); }
+.hour-ticks span:first-child { transform: none; }
+.hour-ticks span:last-child { transform: translateX(-100%); }
+
+/* segments */
+.seg { border-top: 2px solid var(--ink); padding-top: 1rem; display: grid; gap: 0.75rem; scroll-margin-top: 7.5rem; }
+.seg > *, .back > * { min-width: 0; }
+.seg-head { display: grid; gap: 0.2rem; }
+.seg-time {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  align-items: baseline;
+}
+.seg-time .onnow { display: none; color: var(--now); text-transform: uppercase; letter-spacing: 0.08em; font-size: 1rem; }
+.seg.is-now .seg-time { color: var(--now); }
+.seg.is-now .seg-time .onnow { display: inline; }
+h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2rem;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+.seg-point { color: var(--muted); }
+
+.cue {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: 0 0.6rem;
+  padding: 0.7rem 0.5rem;
+  margin-inline: -0.5rem;
+  border-top: 1px solid var(--rule);
+  scroll-margin-top: 8rem;
+}
+.cue.is-now { background: var(--now-soft); border-radius: 0.375rem; border-top-color: transparent; }
+.cue.is-now + .cue { border-top-color: transparent; }
+.at {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  padding-top: 0.1rem;
+}
+.cue.is-now .at { color: var(--now); font-weight: 700; }
+.what { display: grid; gap: 0.4rem; min-width: 0; }
+.what > * { min-width: 0; }
+.kind {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.05rem 0.4rem;
+  margin-right: 0.35rem;
+  border-radius: 0.25rem;
+  background: var(--rule);
+  color: var(--ink);
+  vertical-align: 0.1em;
+}
+.kind.run, .kind.type { background: var(--act-soft); color: var(--act); }
+.kind.ask { background: var(--ask-soft); color: var(--ask); }
+.note { color: var(--muted); }
+code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 0.25rem;
+  padding: 0 0.25em;
+  overflow-wrap: anywhere;
+}
+.cmd { font-weight: 700; color: var(--act); }
+.num { font-family: var(--font-mono); font-size: 0.9em; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.code { overflow-x: auto; background: var(--surface); border: 1px solid var(--rule); border-radius: 0.375rem; }
+.code pre { font-family: var(--font-mono); font-size: 0.8125rem; line-height: 1.5; padding: 0.6rem 0.75rem; }
+
+.check { border: 1.5px solid var(--ink); border-radius: 0.375rem; padding: 0.7rem 0.85rem; }
+.bridge { color: var(--muted); }
+.tag {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-right: 0.4rem;
+  color: var(--ink);
+}
+
+/* back matter */
+.back { border-top: 2px solid var(--ink); padding-top: 1rem; display: grid; gap: 0.75rem; }
+.back h2 { font-size: 1.75rem; }
+.list { display: grid; gap: 0.5rem; }
+.preflight label { display: grid; grid-template-columns: 1.5rem minmax(0, 1fr); gap: 0.5rem; align-items: start; cursor: pointer; }
+.preflight input { width: 1.15rem; height: 1.15rem; margin: 0.2rem 0 0; accent-color: var(--now); }
+.steps { counter-reset: step; }
+.steps li { display: grid; grid-template-columns: 1.5rem minmax(0, 1fr); gap: 0.5rem; }
+.steps li::before { counter-increment: step; content: counter(step); font-family: var(--font-mono); font-weight: 700; color: var(--muted); }
+.qa { display: grid; gap: 0.9rem; }
+.qa dt { font-weight: 700; }
+.qa dd { color: var(--muted); }
+.slide-name { font-weight: 700; }
+.slide-name .min { margin-left: 0.4rem; font-family: var(--font-mono); font-size: 0.8125rem; font-weight: 400; color: var(--muted); }
+.cue.is-now .slide-name .min { color: var(--now); }
+.goal { color: var(--act); font-weight: 700; }
+</style>
+
+<header class="clock">
+  <div class="clock-in">
+    <span class="time" id="time">00:00</span>
+    <button class="primary" id="toggle" type="button">Start</button>
+    <button id="reset" type="button">Reset</button>
+    <button class="nowline" id="now" type="button">Start the clock with your first word</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="intro">
+    <p class="eyebrow">45 minutes · live · Jakarta EE 11 · Open Liberty</p>
+    <h1>JakartaOne Run of Show</h1>
+    <p class="lede">One block per slide; the number on the left is the slide number. Each line is one click. Lines in quotes are yours to say, grey lines are stage directions and background. The numbers came from this laptop, so on the day read them off the screen.</p>
+  </div>
+
+  <div class="hour" aria-hidden="true">
+    <div class="hour-track">
+      <div class="hour-bar">
+        <span class="hb" style="flex:3"></span>
+        <span class="hb" style="flex:3"></span>
+        <span class="hb" style="flex:3"></span>
+        <span class="hb demo" style="flex:6">Switch</span>
+        <span class="hb demo" style="flex:6">Moved</span>
+        <span class="hb demo" style="flex:12">Rebuild</span>
+        <span class="hb demo" style="flex:6">Deadlines</span>
+        <span class="hb" style="flex:6"></span>
+      </div>
+      <i class="hour-mark" id="mark" hidden></i>
+    </div>
+    <div class="hour-ticks">
+      <span style="left:0.000%">0</span>
+      <span style="left:6.667%">3</span>
+      <span style="left:13.333%">6</span>
+      <span style="left:20.000%">9</span>
+      <span style="left:33.333%">15</span>
+      <span style="left:46.667%">21</span>
+      <span style="left:73.333%">33</span>
+      <span style="left:86.667%">39</span>
+      <span style="left:100.000%">45</span>
+    </div>
+  </div>
+
+  <section class="seg" id="opening" data-start="0" data-end="3" data-name="Opening">
+    <div class="seg-head">
+      <p class="seg-time"><span>0:00 to 0:03</span><span>3 min</span><span class="onnow">On now</span></p>
+      <h2>Opening</h2>
+      <p class="seg-point">Ask in chat who runs virtual threads, then promise the arc: faster, then broken, then fixed.</p>
+    </div>
+    <ol class="cues">
+      <li class="cue" data-at="0"><span class="at">01</span><div class="what">
+        <p class="slide-name">Title <span class="min">0:00</span></p>
+        <p class="goal">Set the promise: one Jakarta EE service, made faster, then broken, then fixed.</p>
+        <p>“I’m Bazlur. In the next 45 minutes we take one Jakarta EE service, switch it to virtual threads with one line, and watch it get faster. Then we give it a bigger day and watch it break. Then we fix it by writing down limits we never knew we had.”</p>
+        <p class="note">Press T so your real time shows on the ruler. In a second terminal, have ./run.sh db, provider and app already running.</p>
+      </div></li>
+      <li class="cue" data-at="0.5"><span class="at">02</span><div class="what">
+        <p class="slide-name">Type in chat <span class="min">0:00</span></p>
+        <p class="goal">Find out who runs virtual threads, and plant the question the talk answers.</p>
+        <p><span class="kind">click 0</span>“Quick poll in the chat. Type 1 if you run Java 21 or later in production.”</p>
+        <p class="note">Give the chat ten seconds. Read a few answers out.</p>
+        <p><span class="kind">click 1</span>“Type 2 if virtual threads are switched on.”</p>
+        <p><span class="kind">click 2</span>“And type 3 if you changed anything else when you switched them on. That last one is this talk.”</p>
+      </div></li>
+      <li class="cue" data-at="1"><span class="at">03</span><div class="what">
+        <p class="slide-name">Turning them on is one line <span class="min">0:01</span></p>
+        <p class="goal">Switching them on is trivial. The consequences are not in the diff.</p>
+        <p><span class="kind">click 0</span>“In Jakarta EE 11, Jakarta Concurrency 3.1 lets a managed executor run on virtual threads. It is one attribute: virtual = true.”</p>
+        <p><span class="kind">click 1</span>“Java 21 or later, and any Jakarta EE 11 server. I use Open Liberty today, but nothing here is Liberty-specific until I say so.”</p>
+        <p><span class="kind">click 2</span>“Nothing in this diff looks like a bug in code review. Keep that in mind.”</p>
+      </div></li>
+      <li class="cue" data-at="2"><span class="at">04</span><div class="what">
+        <p class="slide-name">One service, two sales, one rebuild <span class="min">0:02</span></p>
+        <p class="goal">Give the map of the talk.</p>
+        <p><span class="kind">click 0</span>“The plan. First a small sale: sixteen platform threads struggle, virtual threads fix it.”</p>
+        <p><span class="kind">click 1</span>“Then the launch: a big sale, 700 reservations a second. That is where it breaks.”</p>
+        <p><span class="kind">click 2</span>“Then we rebuild it, writing the limits down.”</p>
+        <p><span class="kind">click 3</span>“And last, deadlines: what happens to the work after the customer gives up.”</p>
+        <p><span class="kind">click 4</span>“Every number you see was measured on this laptop with k6. Nothing is drawn by hand.”</p>
+      </div></li>
+    </ol>
+  </section>
+
+  <section class="seg" id="primer" data-start="3" data-end="6" data-name="What a virtual thread is">
+    <div class="seg-head">
+      <p class="seg-time"><span>0:03 to 0:06</span><span>3 min</span><span class="onnow">On now</span></p>
+      <h2>What a virtual thread is</h2>
+      <p class="seg-point">Waiting gets cheap. Nothing gets faster.</p>
+    </div>
+    <ol class="cues">
+      <li class="cue" data-at="3"><span class="at">05</span><div class="what">
+        <p class="slide-name">A platform thread is an OS thread <span class="min">0:03</span></p>
+        <p class="goal">Show what a waiting platform thread costs, so the audience sees what virtual threads change.</p>
+        <p><span class="kind">click 0</span>“A platform thread is a thin wrapper around an operating-system thread. One task takes one thread and keeps it until it finishes.”</p>
+        <p class="note">Point at one lane: the request on the left, its work drawn to the right.</p>
+        <p><span class="kind">click 1</span>“The solid part is real work. The hatched part is waiting for the database, and for a typical service that is most of the time. The thread is held the whole time.”</p>
+        <p class="note"><b>Background.</b> About a megabyte of stack is reserved per thread. The real cost is that OS threads are limited, so every server caps them.</p>
+        <p><span class="kind">click 2</span>“Because threads are expensive we pool them. In our service the pool is sixteen. Remember that number: it was quietly doing a second job.”</p>
+      </div></li>
+      <li class="cue" data-at="4"><span class="at">06</span><div class="what">
+        <p class="slide-name">A virtual thread belongs to the JVM <span class="min">0:04</span></p>
+        <p class="goal">Mount, park, unmount: the one mechanism the rest of the talk relies on.</p>
+        <p><span class="kind">click 0</span>“A virtual thread is a thread the JVM schedules itself. It needs an OS thread, its carrier, only while it is running.”</p>
+        <p><span class="kind">click 1</span>“When it blocks, on a socket, a sleep or a lock, the JVM parks it and the carrier picks up another one. Nobody holds an OS thread while waiting.”</p>
+        <p><span class="kind">click 2</span>“When the answer comes, it mounts again on whichever carrier is free. Your code is still plain blocking code.”</p>
+        <p><span class="kind">click 3</span>“So thousands can wait at once on a few carriers. The advice is: never pool virtual threads. Hold on to that advice. It is about to cost us.”</p>
+        <p class="note"><b>Background.</b> JEP 444, final since JDK 21.</p>
+      </div></li>
+      <li class="cue" data-at="5"><span class="at">07</span><div class="what">
+        <p class="slide-name">Nothing got faster <span class="min">0:05</span></p>
+        <p class="goal">The gain is throughput. No single request got faster.</p>
+        <p><span class="kind">click 0</span>“A measurement from my last talk, in plain Java: a thousand requests, each waits 100 ms. Top lane, a pool of 50. Bottom lane, a thread each.”</p>
+        <p><span class="kind">click 1</span>Let it play. “Fifty at a time on top. Everyone else queues for a thread.”</p>
+        <p><span class="kind">click 2</span>“2,084 milliseconds against 114. But every request still waited its 100 ms. Nothing got faster. We stopped queueing for a thread.”</p>
+      </div></li>
+    </ol>
+  </section>
+
+  <section class="seg" id="service" data-start="6" data-end="9" data-name="The service">
+    <div class="seg-head">
+      <p class="seg-time"><span>0:06 to 0:09</span><span>3 min</span><span class="onnow">On now</span></p>
+      <h2>The service</h2>
+      <p class="seg-point">One reservation, five calls at once, and the limits nobody chose on purpose.</p>
+    </div>
+    <ol class="cues">
+      <li class="cue" data-at="6"><span class="at">08</span><div class="what">
+        <p class="slide-name">One reservation, five calls at once <span class="min">0:06</span></p>
+        <p class="goal">Show the service and every limit in it, before anything breaks.</p>
+        <p><span class="kind">click 0</span>“This is the service. One reservation holds four seats and charges one card, and it does all five at once on a managed executor.”</p>
+        <p class="note">Start ./run.sh watch in the second terminal now if it is not running.</p>
+        <p><span class="kind">click 1</span>“The seat holds go through a pool of 20 database connections, about 10 ms each. The payment goes to a provider that takes 20 charges at a time, 50 ms each. Above 20 it says no: HTTP 429.”</p>
+        <p><span class="kind">click 2</span>“The executor has sixteen platform threads. Somebody chose sixteen years ago.”</p>
+        <p><span class="kind">click 3</span>“And the payment call has @Retry on it, the MicroProfile defaults. So far the provider has never said no, so it has never fired.”</p>
+      </div></li>
+      <li class="cue" data-at="7.5"><span class="at">09</span><div class="what">
+        <p class="slide-name">The small sale on sixteen threads <span class="min">0:07</span></p>
+        <p class="goal">Run the small sale live on platform threads.</p>
+        <p><span class="kind">click 0</span>“A small sale. 60 reservations a second, then 120 more a second for six seconds.”</p>
+        <p><span class="kind">click 1</span>“Watch p99 on the k6 dashboard.”</p>
+        <p><span class="kind run">Run</span><code class="cmd">./run.sh load before small</code></p>
+        <p class="note">Expect p99 around one second during the sale and about 700 late. If the live run misbehaves, open results/before-small-7.html.</p>
+      </div></li>
+    </ol>
+  </section>
+
+  <section class="seg" id="switch" data-start="9" data-end="15" data-name="The switch">
+    <div class="seg-head">
+      <p class="seg-time"><span>0:09 to 0:15</span><span>6 min</span><span class="onnow">On now</span></p>
+      <h2>The switch</h2>
+      <p class="seg-point">Virtual threads fix the small sale. The big sale breaks them.</p>
+    </div>
+    <ol class="cues">
+      <li class="cue" data-at="9"><span class="at">10</span><div class="what">
+        <p class="slide-name">The switch <span class="min">0:09</span></p>
+        <p class="goal">Make the one-line switch live.</p>
+        <p><span class="kind">click 0</span>“So we do what everyone does. We switch to virtual threads.”</p>
+        <p><span class="kind">click 1</span>“And we follow the advice: never pool virtual threads. So maxAsync = 16 goes, and virtual = true comes in.”</p>
+        <p><span class="kind">click 2</span>“Same small sale.”</p>
+        <p><span class="kind run">Run</span><code class="cmd">./run.sh state switched</code></p>
+        <p class="note">liberty:dev reloads in about a second. Then run ./run.sh load switched small.</p>
+      </div></li>
+      <li class="cue" data-at="10.5"><span class="at">11</span><div class="what">
+        <p class="slide-name">Same sale, virtual threads <span class="min">0:10</span></p>
+        <p class="goal">Virtual threads delivered.</p>
+        <p><span class="kind">click 0</span>Plays the platform-thread run. “Sixteen threads: p99 a second during the sale. The executor is the queue.”</p>
+        <p><span class="kind">click 1</span>Plays the virtual-thread run over it. “Virtual threads: 72 milliseconds. Same sale. Faster. This is the slide everyone shows.”</p>
+      </div></li>
+      <li class="cue" data-at="12"><span class="at">12</span><div class="what">
+        <p class="slide-name">The launch <span class="min">0:12</span></p>
+        <p class="goal">Set up the climax and ask for a prediction.</p>
+        <p><span class="kind">click 0</span>“Now the launch. 700 a second, for three seconds. The same service, the same switch.”</p>
+        <p><span class="kind">click 1</span>“What happens to p99? Type your guess in the chat.”</p>
+        <p><span class="kind run">Run</span><code class="cmd">./run.sh load switched big</code></p>
+        <p class="note">Watch the second terminal: in flight climbs into the hundreds, retries pour in. Fallback: results/switched-big-1.html.</p>
+      </div></li>
+      <li class="cue" data-at="13"><span class="at">13</span><div class="what">
+        <p class="slide-name">The launch: 700 a second <span class="min">0:13</span></p>
+        <p class="goal">The climax: p99 explodes.</p>
+        <p><span class="kind">click 0</span>“The small sale, faint, for reference.”</p>
+        <p><span class="kind">click 1</span>Plays the big sale and freezes. “p99: 2,325 milliseconds. 939 payments failed. 829 reservations in flight at once. Nothing crashed. No exception you would notice. It just stopped working for a thousand people.”</p>
+        <p class="note">Stop talking for two seconds after the freeze.</p>
+        <p class="note"><b>Background.</b> Across three runs p99 was 2.3 to 3.7 seconds. Quote the run on screen.</p>
+      </div></li>
+    </ol>
+  </section>
+
+  <section class="seg" id="moved" data-start="15" data-end="21" data-name="Where it moved">
+    <div class="seg-head">
+      <p class="seg-time"><span>0:15 to 0:21</span><span>6 min</span><span class="onnow">On now</span></p>
+      <h2>Where it moved</h2>
+      <p class="seg-point">The queue moved from the thread pool to the connection pool and the provider.</p>
+    </div>
+    <ol class="cues">
+      <li class="cue" data-at="15"><span class="at">14</span><div class="what">
+        <p class="slide-name">Where the queue moved <span class="min">0:15</span></p>
+        <p class="goal">Make the invisible queue visible.</p>
+        <p><span class="kind">click 0</span>“The same sale as a picture. Traffic on the left, the reservations in flight in the middle, the 20 connections, the provider.”</p>
+        <p><span class="kind">click 1</span>Plays three seconds, then freezes. “700 a second. Nothing makes anyone wait at the door, so they all go straight to the pool and the provider. 829 in flight. The red ones have already missed half a second. The provider is full and refusing charges.”</p>
+        <p><span class="kind">click 2</span>Plays on. “When the sale ends it drains in about three seconds.”</p>
+        <p><span class="kind">click 3</span>“The totals: 939 payments failed, 4,000 retries, and 9,061 seat holds had to queue for a connection.”</p>
+      </div></li>
+      <li class="cue" data-at="17"><span class="at">15</span><div class="what">
+        <p class="slide-name">Sixteen threads were your limit <span class="min">0:17</span></p>
+        <p class="goal">Explain why this never happened before the switch.</p>
+        <p><span class="kind">click 0</span>“Why didn’t this happen before? Sixteen platform threads meant at most sixteen seat holds and payments at once. Nobody designed that as protection. It was an accident, but it was a limit.”</p>
+        <p><span class="kind">click 1</span>“With virtual threads every reservation starts all five calls at once. Parked threads are almost free, so nothing pushes back.”</p>
+        <p><span class="kind">click 2</span>“The limit moved to the 20 connections. 829 reservations queued for them.”</p>
+        <p><span class="kind">click 3</span>“Sixteen protected the database and the provider. Nobody wrote it down.”</p>
+        <p class="note"><b>Background.</b> Honest note: the old version would have been far worse at the big sale (p99 11.7 seconds). It failed slowly and visibly in its own queue.</p>
+      </div></li>
+      <li class="cue" data-at="18.5"><span class="at">16</span><div class="what">
+        <p class="slide-name">@Retry was always there <span class="min">0:18</span></p>
+        <p class="goal">Show the retry storm.</p>
+        <p><span class="kind">click 0</span>“The provider takes 20 at a time. It refused 4,939 charges.”</p>
+        <p><span class="kind">click 1</span>“Each refusal was retried, up to three times. 4,000 retries, each one more load on a provider that was already full.”</p>
+        <p><span class="kind">click 2</span>“And 939 customers had their payment fail anyway.”</p>
+        <p><span class="kind">click 3</span>“That @Retry was always in the code. It never fired before the switch, because sixteen threads never sent more than the provider could take.”</p>
+      </div></li>
+      <li class="cue" data-at="20"><span class="at">17</span><div class="what">
+        <p class="slide-name">Check 1 <span class="min">0:20</span></p>
+        <p class="goal">First take-home question.</p>
+        <p>“First check to take home.” Read it out. “If the honest answer used to be ‘the thread pool’, that limit is gone the day you switch.”</p>
+      </div></li>
+    </ol>
+  </section>
+
+  <section class="seg" id="rebuild" data-start="21" data-end="33" data-name="The rebuild">
+    <div class="seg-head">
+      <p class="seg-time"><span>0:21 to 0:33</span><span>12 min</span><span class="onnow">On now</span></p>
+      <h2>The rebuild</h2>
+      <p class="seg-point">Write the limits down: a door in front, a budget per dependency.</p>
+    </div>
+    <ol class="cues">
+      <li class="cue" data-at="21"><span class="at">18</span><div class="what">
+        <p class="slide-name">The rebuild <span class="min">0:21</span></p>
+        <p class="goal">Open part two.</p>
+        <p>“So we rebuild it. Not by going back to sixteen threads. By writing the limits down: a door in front, and a budget behind it for each dependency.”</p>
+      </div></li>
+      <li class="cue" data-at="21.5"><span class="at">19</span><div class="what">
+        <p class="slide-name">A door: at most 24 inside <span class="min">0:21</span></p>
+        <p class="goal">Admission control in a Jakarta REST filter.</p>
+        <p><span class="kind">click 0</span>“The door is a Jakarta REST request filter with a semaphore.”</p>
+        <p><span class="kind">click 1</span>“The limit comes from config: 24.”</p>
+        <p><span class="kind">click 2</span>“tryAcquire, not acquire. If there is no room we don’t queue at the door, we answer 503 with Retry-After at once.”</p>
+        <p><span class="kind">click 3</span>“And the response filter hands the permit back on the way out.”</p>
+        <p><span class="kind">click 4</span>“Why 24? The provider does about 360 charges a second, and a reservation takes about 52 ms. Little’s law: 360 times 0.052 is about 19 inside at full speed. 24 leaves room for bursts.”</p>
+      </div></li>
+      <li class="cue" data-at="24"><span class="at">20</span><div class="what">
+        <p class="slide-name">The same sale, with a door <span class="min">0:24</span></p>
+        <p class="goal">The door survives the big sale.</p>
+        <p><span class="kind">click 0</span>“The same simulation, with the door.”</p>
+        <p><span class="kind">click 1</span>Plays three seconds, then freezes. “In flight climbs to 24 and stops. Everyone else is turned away at once, and nobody inside waits.”</p>
+        <p><span class="kind">click 2</span>“926 told to try again at once, never more than 24 inside.”</p>
+        <p class="note">Honest note if asked: with the door alone, 50 payments still failed, because 24 is more than the provider’s 20. The budgets fix that.</p>
+      </div></li>
+      <li class="cue" data-at="26"><span class="at">21</span><div class="what">
+        <p class="slide-name">maxAsync is back, as a budget <span class="min">0:26</span></p>
+        <p class="goal">The same attribute, now a budget per dependency.</p>
+        <p><span class="kind">click 0</span>“Behind the door, one executor per dependency.”</p>
+        <p><span class="kind">click 1</span>“Seat holds get maxAsync = 20, because the pool has 20 connections.”</p>
+        <p><span class="kind">click 2</span>“Payments get maxAsync = 20, because the provider takes 20 at a time. Work past the budget waits in our executor, not as a 429.”</p>
+        <p><span class="kind">click 3</span>“It is the same attribute we deleted. Now it is a budget, not a thread count. Virtual threads stay on.”</p>
+        <p><span class="kind run">Run</span><code class="cmd">./run.sh state budgeted</code></p>
+        <p class="note"><b>Background.</b> @Bulkhead(20) from MicroProfile Fault Tolerance is another way to write the payment budget.</p>
+      </div></li>
+      <li class="cue" data-at="28.5"><span class="at">22</span><div class="what">
+        <p class="slide-name">The same launch, limits written down <span class="min">0:28</span></p>
+        <p class="goal">The rebuilt service at the big sale.</p>
+        <p><span class="kind">click 0</span>“The same launch. The broken run, faint.”</p>
+        <p><span class="kind run">Run</span><code class="cmd">./run.sh load budgeted big</code></p>
+        <p class="note">Fallback: results/budgets-big-1.html.</p>
+        <p><span class="kind">click 1</span>Plays the rebuilt run. “p99: 114 milliseconds. The grey columns are the people told to try again: 991. And not one payment failed.”</p>
+      </div></li>
+      <li class="cue" data-at="30.5"><span class="at">23</span><div class="what">
+        <p class="slide-name">Saying no to 991 people <span class="min">0:30</span></p>
+        <p class="goal">Refusing some got more served on time.</p>
+        <p><span class="kind">click 0</span>“Saying no to 991 people got 1,080 more a fast yes.”</p>
+        <p class="note"><b>Background.</b> 2,731 on time rebuilt, against 1,651 switched.</p>
+        <p><span class="kind">click 1</span>“And nobody’s payment failed. A fast no beats a slow yes and a failed charge.”</p>
+      </div></li>
+      <li class="cue" data-at="32"><span class="at">24</span><div class="what">
+        <p class="slide-name">Check 2 <span class="min">0:32</span></p>
+        <p class="goal">Second take-home question.</p>
+        <p>“Second check.” Read it out. “Sixteen was a number left over from a thread pool. Twenty and twenty came from the dependencies.”</p>
+      </div></li>
+    </ol>
+  </section>
+
+  <section class="seg" id="deadlines" data-start="33" data-end="39" data-name="Deadlines">
+    <div class="seg-head">
+      <p class="seg-time"><span>0:33 to 0:39</span><span>6 min</span><span class="onnow">On now</span></p>
+      <h2>Deadlines</h2>
+      <p class="seg-point">A deadline on the wait does nothing to the work, and cancelling does not un-send a charge.</p>
+    </div>
+    <ol class="cues">
+      <li class="cue" data-at="33"><span class="at">25</span><div class="what">
+        <p class="slide-name">Deadlines <span class="min">0:33</span></p>
+        <p class="goal">Open part three.</p>
+        <p>“Part three. The provider has a bad day: 1,800 ms a charge. The customer waits 500.”</p>
+      </div></li>
+      <li class="cue" data-at="33.5"><span class="at">26</span><div class="what">
+        <p class="slide-name">We answer at 500 ms <span class="min">0:33</span></p>
+        <p class="goal">Show the deadline everyone writes.</p>
+        <p><span class="kind">click 0</span>“orTimeout on the combined future. At 500 ms the customer gets a 504 and a message to try again.”</p>
+        <p><span class="kind">click 1</span>“What happens to the payment?”</p>
+      </div></li>
+      <li class="cue" data-at="34.5"><span class="at">27</span><div class="what">
+        <p class="slide-name">We said it failed. Then we charged. <span class="min">0:34</span></p>
+        <p class="goal">The customer left. The work stayed.</p>
+        <p><span class="kind">click 0</span>Plays in real time. Stay silent until it stops. “At 507 ms we told the customer it failed. At 1,850 ms we charged the card.”</p>
+        <p><span class="kind">click 1</span>“And the customer presses retry. That is a second charge on its way.”</p>
+        <p><span class="kind">click 2</span>“orTimeout limits how long the customer waits. It says nothing to the work.”</p>
+      </div></li>
+      <li class="cue" data-at="35.5"><span class="at">28</span><div class="what">
+        <p class="slide-name">The fix: cancel the work <span class="min">0:35</span></p>
+        <p class="goal">Cancel every part at the deadline.</p>
+        <p><span class="kind">click 0</span>“The fix: when the deadline fires, cancel every part.”</p>
+        <p><span class="kind">click 1</span>“One line: part.cancel(true).”</p>
+        <p><span class="kind">click 2</span>“A detail worth knowing: on Liberty, cancel(true) on a managed CompletableFuture interrupts the task. On a plain JDK CompletableFuture it does nothing to the running task.”</p>
+      </div></li>
+      <li class="cue" data-at="36"><span class="at">29</span><div class="what">
+        <p class="slide-name">Cancelled at 507 ms <span class="min">0:36</span></p>
+        <p class="goal">Cancel stops your call, not the charge.</p>
+        <p><span class="kind">click 0</span>Plays. “Timed out at 506, payment call cancelled at 507. The last run’s long bar is the ghost.”</p>
+        <p><span class="kind">click 1</span>“But look at the provider. It already had the request, and it charged the card anyway. Cancel stops your call. It does not un-send the charge.”</p>
+        <p class="note"><b>Background.</b> Measured: with cancel, the provider still logged one charge.</p>
+      </div></li>
+      <li class="cue" data-at="37"><span class="at">30</span><div class="what">
+        <p class="slide-name">Charge each reservation once <span class="min">0:37</span></p>
+        <p class="goal">Idempotency keys make the retry safe.</p>
+        <p><span class="kind">click 0</span>“So the retry has to be safe. The customer sends an Idempotency-Key, and we pass it to the provider.”</p>
+        <p><span class="kind">click 1</span>“Without a key the retry is a new reservation: two charges, eight seat holds. With the key the retry finds the first charge: 201 in 26 milliseconds, four seat holds.”</p>
+        <p><span class="kind">click 2</span>“Charged once.”</p>
+      </div></li>
+      <li class="cue" data-at="38"><span class="at">31</span><div class="what">
+        <p class="slide-name">Where this is going <span class="min">0:38</span></p>
+        <p class="goal">Structured concurrency owns the deadline.</p>
+        <p><span class="kind">click 0</span>“Where this is going: structured concurrency. The scope owns the deadline, and nothing leaves the scope while its work runs.”</p>
+        <p><span class="kind">click 1</span>“It is a preview in JDK 25, and this is plain Java from my last talk, not Liberty yet.”</p>
+        <p><span class="kind">click 2</span>“Cancelled at 207, reported at 208: the work stops before the customer is told.”</p>
+      </div></li>
+      <li class="cue" data-at="38.5"><span class="at">32</span><div class="what">
+        <p class="slide-name">Check 3 <span class="min">0:38</span></p>
+        <p class="goal">Third take-home question.</p>
+        <p>“Third check.” Read it out.</p>
+      </div></li>
+    </ol>
+  </section>
+
+  <section class="seg" id="wrap" data-start="39" data-end="45" data-name="Wrap">
+    <div class="seg-head">
+      <p class="seg-time"><span>0:39 to 0:45</span><span>6 min</span><span class="onnow">On now</span></p>
+      <h2>Wrap</h2>
+      <p class="seg-point">What to watch, three checks, then questions.</p>
+    </div>
+    <ol class="cues">
+      <li class="cue" data-at="39"><span class="at">33</span><div class="what">
+        <p class="slide-name">What to watch <span class="min">0:39</span></p>
+        <p class="goal">The metrics that warn before collapse.</p>
+        <p><span class="kind">click 0</span>“What to watch. Requests in flight: 829 at the big sale, 24 behind the door.”</p>
+        <p><span class="kind">click 1</span>“Waits for a connection. Liberty publishes it as a connection-pool metric.”</p>
+        <p><span class="kind">click 2</span>“Retries. Each one is more load.”</p>
+        <p><span class="kind">click 3</span>“Refusals: the 429s you get and the 503s you give. The first is a warning, the second is your protection working.”</p>
+        <p><span class="kind">click 4</span>“And p99 second by second. An average over the run hides a sale.”</p>
+      </div></li>
+      <li class="cue" data-at="40.5"><span class="at">34</span><div class="what">
+        <p class="slide-name">Three checks to take home <span class="min">0:40</span></p>
+        <p class="goal">Leave them with something to do on Monday.</p>
+        <p>“Three checks for Monday.” Read them. Leave the slide up for a moment.</p>
+      </div></li>
+      <li class="cue" data-at="41.5"><span class="at">35</span><div class="what">
+        <p class="slide-name">Threads got free. Nothing else did. <span class="min">0:41</span></p>
+        <p class="goal">The whole talk in one slide.</p>
+        <p><span class="kind">click 0</span>“Threads got free. Nothing else did. Sixteen threads were doing three jobs nobody gave them.”</p>
+        <p><span class="kind">click 1</span>“Keeping the database under its 20 connections.”</p>
+        <p><span class="kind">click 2</span>“Keeping the provider under its limit, so @Retry never fired.”</p>
+        <p><span class="kind">click 3</span>“Being the one number in the system that said ‘enough’.”</p>
+        <p><span class="kind">click 4</span>“Those jobs are yours now.”</p>
+      </div></li>
+      <li class="cue" data-at="42.5"><span class="at">36</span><div class="what">
+        <p class="slide-name">Thank you <span class="min">0:42</span></p>
+        <p class="goal">Close, point at the code, open the floor.</p>
+        <p>“Thank you. The code is on GitHub, and ./run.sh state before, switched, budgeted, deadlines puts every version in front of you.”</p>
+      </div></li>
+      <li class="cue" data-at="43"><span class="at">37</span><div class="what">
+        <p class="slide-name">The long version <span class="min">0:43</span></p>
+        <p class="goal">Leave this up during questions.</p>
+        <p>“If you want the long version, it is in the book. The QR code goes there.” Then take questions from the chat.</p>
+      </div></li>
+    </ol>
+  </section>
+
+  <section class="seg" id="questions" data-start="43" data-end="45" data-name="Questions">
+    <div class="seg-head">
+      <p class="seg-time"><span>0:43 to 0:45</span><span>2 min</span><span class="onnow">On now</span></p>
+      <h2>Questions you may get</h2>
+      <p class="seg-point">Short answers. The runs already made the argument.</p>
+    </div>
+    <dl class="qa">
+      <div><dt>Should I pool virtual threads?</dt><dd>No. Limit the dependency, not the threads: a budget per dependency, with <code>maxAsync</code> on its own executor, a semaphore, or <code>@Bulkhead</code>.</dd></div>
+      <div><dt>Does <code>maxAsync</code> with <code>virtual = true</code> make a thread pool?</dt><dd>No. It bounds how many tasks run at once. Each task still gets its own virtual thread.</dd></div>
+      <div><dt>Why not raise the pool to 200 connections?</dt><dd>Then the database is what saturates, and the limit moves again. Size the pool from what the database can take, then budget against it.</dd></div>
+      <div><dt>How do I pick the numbers?</dt><dd>Little’s law: in flight = throughput × time. About 360 charges a second × 52 ms ≈ 19 inside, so the door is 24.</dd></div>
+      <div><dt>What about Liberty’s request threads?</dt><dd>The resource returns a <code>CompletionStage</code>, so request threads are released. The limits are the door and the budgets.</dd></div>
+      <div><dt>Does <code>cancel(true)</code> work everywhere?</dt><dd>On Liberty’s managed <code>CompletableFuture</code>, yes. On a plain JDK <code>CompletableFuture</code>, no: use the <code>Future</code> from <code>submit()</code>, or structured concurrency.</dd></div>
+      <div><dt>And <code>@Timeout</code>?</dt><dd>It interrupts the call too, and like <code>cancel</code> it cannot un-send a charge. That is what the idempotency key is for.</dd></div>
+      <div><dt>Is <code>synchronized</code> safe now?</dt><dd>For pinning, yes, from JDK 24 (JEP 491). Native frames and class initializers still pin. The backup slide shows it.</dd></div>
+      <div><dt>Are the numbers repeatable?</dt><dd>Three runs each. At the big sale p99 on virtual threads ranged 2.3 to 3.7 seconds; the story held every time.</dd></div>
+    </dl>
+  </section>
+
+  <section class="back preflight" id="preflight">
+    <h2>Before you go on</h2>
+    <div class="list">
+      <label for="pf-java"><input type="checkbox" id="pf-java"><span><code>java -version</code> prints 25. Docker is running.</span></label>
+      <label for="pf-db"><input type="checkbox" id="pf-db"><span><code>./run.sh db</code>, then <code>./run.sh provider</code> (50 ms) in its own terminal.</span></label>
+      <label for="pf-app"><input type="checkbox" id="pf-app"><span><code>./run.sh app</code> in its own terminal; wait for the server to say it is ready.</span></label>
+      <label for="pf-state"><input type="checkbox" id="pf-state"><span><code>./run.sh state before</code>, then one warm-up <code>./run.sh load before small</code>.</span></label>
+      <label for="pf-watch"><input type="checkbox" id="pf-watch"><span><code>./run.sh watch</code> in a fourth terminal, next to the k6 dashboard.</span></label>
+      <label for="pf-power"><input type="checkbox" id="pf-power"><span>Power adapter in, Low Power Mode off. Streaming software running, as in the rehearsal.</span></label>
+      <label for="pf-quiet"><input type="checkbox" id="pf-quiet"><span>Do Not Disturb on. Slack and mail closed.</span></label>
+      <label for="pf-tabs"><input type="checkbox" id="pf-tabs"><span><code>slides.html</code> in Chrome, full screen (<code>F</code>). Fallback k6 reports open in tabs behind it.</span></label>
+      <label for="pf-clock"><input type="checkbox" id="pf-clock"><span>This page open on your phone. Start the clock with your first word.</span></label>
+    </div>
+  </section>
+
+  <section class="back" id="long">
+    <h2>If you run long, cut in this order</h2>
+    <ol class="list steps">
+      <li><span>Skip the live runs after the switch and show the recorded k6 reports. Saves about 3 minutes.</span></li>
+      <li><span>Skip <code>intro-race</code>. Saves 1 minute.</span></li>
+      <li><span>Skip <code>scope</code>; say “structured concurrency is next” and move on. Saves 1 minute.</span></li>
+      <li><span>Leave the pinning backup for questions only.</span></li>
+    </ol>
+  </section>
+
+  <section class="back" id="short">
+    <h2>If you run short</h2>
+    <p>Run <code>./run.sh load budgeted small</code> to show the rebuilt service at the small sale too, then take questions from the chat between parts.</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  var TOTAL = 45;
+  var KEY = 'jakartaone-run-of-show-clock';
+  var CHECKS = 'vt-run-of-show-checks';
+
+  var segs = Array.prototype.map.call(document.querySelectorAll('.seg[data-start]'), function (el) {
+    return { el: el, start: Number(el.dataset.start), end: Number(el.dataset.end), name: el.dataset.name };
+  });
+  var cues = Array.prototype.map.call(document.querySelectorAll('.cue[data-at]'), function (el) {
+    return { el: el, at: Number(el.dataset.at) };
+  });
+
+  var timeEl = document.getElementById('time');
+  var nowEl = document.getElementById('now');
+  var toggle = document.getElementById('toggle');
+  var reset = document.getElementById('reset');
+  var mark = document.getElementById('mark');
+
+  var state = { running: false, startedAt: 0, banked: 0 };
+  var wakeLock = null;
+  var resetArmedUntil = 0;
+  var jumpTarget = null;
+
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY));
+    if (saved && typeof saved.banked === 'number' && typeof saved.startedAt === 'number') {
+      state = { running: !!saved.running, startedAt: saved.startedAt, banked: saved.banked };
+    }
+  } catch (e) {}
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function elapsed() {
+    return state.banked + (state.running ? Date.now() - state.startedAt : 0);
+  }
+
+  function two(n) { return n < 10 ? '0' + n : String(n); }
+
+  function clock(ms) {
+    var s = Math.max(0, Math.floor(ms / 1000));
+    return two(Math.floor(s / 60)) + ':' + two(s % 60);
+  }
+
+  function left(ms) {
+    var s = Math.max(0, Math.ceil(ms / 1000));
+    return Math.floor(s / 60) + ':' + two(s % 60);
+  }
+
+  function render() {
+    var ms = elapsed();
+    var min = ms / 60000;
+    var started = state.running || ms > 0;
+    var current = null;
+    var currentCue = null;
+    var i;
+
+    timeEl.textContent = clock(ms);
+    timeEl.classList.toggle('over', min >= TOTAL);
+    toggle.textContent = state.running ? 'Pause' : (ms > 0 ? 'Resume' : 'Start');
+
+    for (i = 0; i < segs.length; i++) {
+      var on = started && min >= segs[i].start && min < segs[i].end;
+      segs[i].el.classList.toggle('is-now', on);
+      if (on) current = segs[i];
+    }
+    if (started && min < TOTAL) {
+      for (i = 0; i < cues.length; i++) {
+        if (cues[i].at <= min) currentCue = cues[i];
+      }
+    }
+    if (current && currentCue && currentCue.at < current.start) currentCue = null;
+    for (i = 0; i < cues.length; i++) {
+      cues[i].el.classList.toggle('is-now', cues[i] === currentCue);
+    }
+
+    if (!started) {
+      nowEl.textContent = 'Start the clock with your first word';
+    } else if (!current) {
+      nowEl.textContent = 'Over time by ' + left(ms - TOTAL * 60000);
+    } else {
+      nowEl.textContent = current.name + ' · ' + left(current.end * 60000 - ms) + ' left · tap to jump';
+    }
+
+    mark.hidden = !started;
+    mark.style.left = Math.min(100, (min / TOTAL) * 100) + '%';
+    jumpTarget = currentCue ? currentCue.el : (current ? current.el : null);
+  }
+
+  function holdScreen() {
+    if (!state.running || !navigator.wakeLock || document.visibilityState !== 'visible') return;
+    try {
+      navigator.wakeLock.request('screen').then(function (lock) { wakeLock = lock; }, function () {});
+    } catch (e) {}
+  }
+
+  function releaseScreen() {
+    try { if (wakeLock) wakeLock.release(); } catch (e) {}
+    wakeLock = null;
+  }
+
+  toggle.addEventListener('click', function () {
+    if (state.running) {
+      state.banked = elapsed();
+      state.running = false;
+      releaseScreen();
+    } else {
+      state.startedAt = Date.now();
+      state.running = true;
+      holdScreen();
+    }
+    save();
+    render();
+  });
+
+  reset.addEventListener('click', function () {
+    if (Date.now() < resetArmedUntil) {
+      state = { running: false, startedAt: 0, banked: 0 };
+      resetArmedUntil = 0;
+      reset.textContent = 'Reset';
+      releaseScreen();
+      save();
+      render();
+      return;
+    }
+    resetArmedUntil = Date.now() + 3000;
+    reset.textContent = 'Tap again';
+    setTimeout(function () {
+      if (resetArmedUntil && Date.now() >= resetArmedUntil) {
+        resetArmedUntil = 0;
+        reset.textContent = 'Reset';
+      }
+    }, 3100);
+  });
+
+  nowEl.addEventListener('click', function () {
+    if (!jumpTarget) return;
+    var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    jumpTarget.scrollIntoView({ block: 'center', behavior: calm ? 'auto' : 'smooth' });
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') {
+      holdScreen();
+      render();
+    }
+  });
+
+  var checks = {};
+  try { checks = JSON.parse(localStorage.getItem(CHECKS)) || {}; } catch (e) { checks = {}; }
+  Array.prototype.forEach.call(document.querySelectorAll('.preflight input[type="checkbox"]'), function (box) {
+    if (checks[box.id]) box.checked = true;
+    box.addEventListener('change', function () {
+      checks[box.id] = box.checked;
+      try { localStorage.setItem(CHECKS, JSON.stringify(checks)); } catch (e) {}
+    });
+  });
+
+  render();
+  holdScreen();
+  setInterval(render, 250);
+})();
+</script>

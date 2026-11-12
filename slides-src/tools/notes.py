@@ -16,241 +16,208 @@ def S(say, tip=None, run=None, more=None):
 
 
 SEGMENTS = [
-    ('opening', 'Opening', 0, 3, 'Get a show of hands, then promise three things that break.'),
-    ('primer', 'What a virtual thread is', 3, 10, 'Nothing gets faster. Waiting gets cheap, so requests stop queueing for a thread.'),
-    ('demo-1', 'The database slows down', 10, 24, 'The thread pool was your limit. It is gone, so set one on purpose.'),
-    ('demo-2', 'Requests run one at a time', 24, 38, 'Cheap waiting is still waiting. Keep slow calls out of the lock.'),
-    ('demo-3', 'Work continues after a timeout', 38, 51, 'A timeout on the wait does nothing to the work.'),
-    ('wrap', 'Wrap', 51, 56, 'One idea, three checks, then the book and where to find you.'),
+    ('opening', 'Opening', 0, 3, 'Ask in chat who runs virtual threads, then promise the arc: faster, then broken, then fixed.'),
+    ('primer', 'What a virtual thread is', 3, 6, 'Waiting gets cheap. Nothing gets faster.'),
+    ('service', 'The service', 6, 9, 'One reservation, five calls at once, and the limits nobody chose on purpose.'),
+    ('switch', 'The switch', 9, 15, 'Virtual threads fix the small sale. The big sale breaks them.'),
+    ('moved', 'Where it moved', 15, 21, 'The queue moved from the thread pool to the connection pool and the provider.'),
+    ('rebuild', 'The rebuild', 21, 33, 'Write the limits down: a door in front, a budget per dependency.'),
+    ('deadlines', 'Deadlines', 33, 39, 'A deadline on the wait does nothing to the work, and cancelling does not un-send a charge.'),
+    ('wrap', 'Wrap', 39, 45, 'What to watch, three checks, then questions.'),
 ]
 
 SLIDES = [
-    ('title', 'Title', 0, 'Set the promise: one small service, broken three ways, live.', [
-        S('“I’m Bazlur. For the next hour we take one small seat-reservation service and break it three different ways, live, and fix it each time. Everything runs on JDK 25 from a single file, so you can repeat every demo on your own laptop tonight.”',
-          tip='Press T first if you want your real time on the ruler. The trace on the slide crosses the limit line three times: that is the outline of the talk.',
-          more='If the room looks new to virtual threads, add: “You don’t need to have used them. I’ll spend five minutes on what they are.”'),
+    ('title', 'Title', 0, 'Set the promise: one Jakarta EE service, made faster, then broken, then fixed.', [
+        S('“I’m Bazlur. In the next 45 minutes we take one Jakarta EE service, switch it to virtual threads with one line, and watch it get faster. Then we give it a bigger day and watch it break. Then we fix it by writing down limits we never knew we had.”',
+          tip='Press T so your real time shows on the ruler. In a second terminal, have ./run.sh db, provider and app already running.'),
     ]),
-    ('hands', 'Hands up if', 0, 'Find out who runs virtual threads, and plant the question the talk answers.', [
-        S('“Hands up if you run Java 21 or later in production.”',
-          more='Most hands should go up: 21 is the first long-term-support release with virtual threads final.'),
-        S('“Keep it up if virtual threads are switched on.”', more='Expect about half the hands to drop.'),
-        S('“Keep it up if you changed anything else when you switched them on.” Pause and look around the room. “Almost nobody. That last question is this talk: what else has to change.”'),
+    ('hands', 'Type in chat', 0.5, 'Find out who runs virtual threads, and plant the question the talk answers.', [
+        S('“Quick poll in the chat. Type 1 if you run Java 21 or later in production.”', tip='Give the chat ten seconds. Read a few answers out.'),
+        S('“Type 2 if virtual threads are switched on.”'),
+        S('“And type 3 if you changed anything else when you switched them on. That last one is this talk.”'),
     ]),
     ('one-line', 'Turning them on is one line', 1, 'Switching them on is trivial. The consequences are not in the diff.', [
-        S('“Turning them on is one line. In Spring Boot 3.2 and later it is this property. Other frameworks have a similar switch, or you swap one executor.”',
-          more='With this property Tomcat handles each request on a new virtual thread instead of a pooled platform thread.'),
-        S('“Three things can go wrong afterwards.”'),
-        S('“And none of them looks like a bug in code review. The diff is one line of configuration. The problems are in code nobody touched.”'),
+        S('“In Jakarta EE 11, Jakarta Concurrency 3.1 lets a managed executor run on virtual threads. It is one attribute: virtual = true.”'),
+        S('“Java 21 or later, and any Jakarta EE 11 server. I use Open Liberty today, but nothing here is Liberty-specific until I say so.”'),
+        S('“Nothing in this diff looks like a bug in code review. Keep that in mind.”'),
     ]),
-    ('plan', 'One service, three ways to break it', 2, 'Give the map of the hour and the method.', [
-        S('“One: the database slows down, and the service falls over in a way it never did with a thread pool.”'),
-        S('“Two: requests run one at a time, even though every one of them has its own thread.”'),
-        S('“Three: work continues after a timeout. The caller has gone. The work hasn’t.”'),
-        S('“The method is the same each time: break it, read what it prints, fix it. Every demo is one Java file you run with java File.java. No build, no framework, no Docker.”',
-          more='The dependencies are a sleep and a semaphore on purpose, so nothing can fail on stage. Each one stands for a real thing, and you say which when you get there: the connection pool, the payment provider.'),
+    ('plan', 'One service, two sales, one rebuild', 2, 'Give the map of the talk.', [
+        S('“The plan. First a small sale: sixteen platform threads struggle, virtual threads fix it.”'),
+        S('“Then the launch: a big sale, 700 reservations a second. That is where it breaks.”'),
+        S('“Then we rebuild it, writing the limits down.”'),
+        S('“And last, deadlines: what happens to the work after the customer gives up.”'),
+        S('“Every number you see was measured on this laptop with k6. Nothing is drawn by hand.”'),
     ]),
-    ('platform', 'A platform thread is an OS thread', 3, 'Show what a waiting platform thread costs, so the room sees what virtual threads change.', [
-        S('“A platform thread is a thin wrapper around an operating-system thread. In the classic model one request takes one thread and keeps it until the response is written.”',
+    ('platform', 'A platform thread is an OS thread', 3, 'Show what a waiting platform thread costs, so the audience sees what virtual threads change.', [
+        S('“A platform thread is a thin wrapper around an operating-system thread. One task takes one thread and keeps it until it finishes.”',
           tip='Point at one lane: the request on the left, its work drawn to the right.'),
-        S('“Now look at what the thread is doing. The solid part is real work. The hatched part is waiting for the database, and for a typical service that is most of the request. The thread is held the whole time, and it reserves about a megabyte of stack whether it works or waits.”',
-          more='The megabyte is reserved address space, not all committed. The real cost is that OS threads are limited and expensive to switch, so every server caps them.'),
-        S('“Because threads are expensive we pool them. Tomcat’s default is 200. Request number 201 queues for a thread. Remember this pool. It comes back in the first demo, because it was quietly doing a second job.”'),
+        S('“The solid part is real work. The hatched part is waiting for the database, and for a typical service that is most of the time. The thread is held the whole time.”',
+          more='About a megabyte of stack is reserved per thread. The real cost is that OS threads are limited, so every server caps them.'),
+        S('“Because threads are expensive we pool them. In our service the pool is sixteen. Remember that number: it was quietly doing a second job.”'),
     ]),
     ('virtual', 'A virtual thread belongs to the JVM', 4, 'Mount, park, unmount: the one mechanism the rest of the talk relies on.', [
-        S('“A virtual thread is a thread the JVM schedules itself. It needs an OS thread only while it is actually running. That OS thread is called its carrier, and by default there is one carrier per core.”'),
-        S('“When the virtual thread blocks, on a socket, a sleep or a lock, the JVM parks it: its stack is copied to the heap, and the carrier immediately picks up another virtual thread. Nobody holds an OS thread while waiting.”',
-          more='The carriers are a ForkJoinPool. Its size is jdk.virtualThreadScheduler.parallelism, the number of processors by default.'),
-        S('“When the database answers, the virtual thread is runnable again and mounts on whichever carrier is free. It may be a different carrier every time. Your code doesn’t notice: it is still plain blocking code, top to bottom.”'),
-        S('“So a thousand requests can wait at once on four carriers. A parked virtual thread costs kilobytes of heap, so you stop pooling and create one new thread per request. This has been final since JDK 21.”',
-          more='JEP 444. Never pool virtual threads: they are meant to be created per task and thrown away.'),
+        S('“A virtual thread is a thread the JVM schedules itself. It needs an OS thread, its carrier, only while it is running.”'),
+        S('“When it blocks, on a socket, a sleep or a lock, the JVM parks it and the carrier picks up another one. Nobody holds an OS thread while waiting.”'),
+        S('“When the answer comes, it mounts again on whichever carrier is free. Your code is still plain blocking code.”'),
+        S('“So thousands can wait at once on a few carriers. The advice is: never pool virtual threads. Hold on to that advice. It is about to cost us.”',
+          more='JEP 444, final since JDK 21.'),
     ]),
-    ('intro-ask', 'A thousand requests', 6, 'Make the room predict the numbers before they see them.', [
-        S('“Let’s measure it. A thousand requests, each waits 100 ms on the database. First with a pool of 50 platform threads. How long?”',
-          tip='Let them work it out: 20 batches of 50, 100 ms each, two seconds.'),
-        S('“And with one virtual thread per request?” Take a guess or two, then switch to the terminal.',
-          run='./run.sh intro',
-          tip='Intro.java is 25 lines: show it for a few seconds before you run it. If the room is warm, change 1_000 to 1_000_000 and comment out the platform line: about 4 seconds. Undo it afterwards.'),
+    ('intro-race', 'Nothing got faster', 5, 'The gain is throughput. No single request got faster.', [
+        S('“A measurement from my last talk, in plain Java: a thousand requests, each waits 100 ms. Top lane, a pool of 50. Bottom lane, a thread each.”'),
+        S('Let it play. “Fifty at a time on top. Everyone else queues for a thread.”'),
+        S('“2,084 milliseconds against 114. But every request still waited its 100 ms. Nothing got faster. We stopped queueing for a thread.”'),
     ]),
-    ('intro-race', 'Nothing got faster', 7, 'The gain is throughput. No single request got faster.', [
-        S('“Here is what you just watched, drawn. Each cell is one request. Top lane: the pool of 50. Bottom lane: a thread each.”'),
-        S('Let it play. It runs in real time for two seconds. While the top lane grinds: “Fifty at a time. Everyone else is queueing for a thread.”'),
-        S('“2,084 milliseconds against 114. But look at what did not change: every request still waited 100 ms on the database. Nothing got faster. We stopped queueing for a thread.”',
-          tip='Point at the two bars at the bottom: the last request in lane A spent almost two seconds queueing and 100 ms being served.',
-          more='Virtual threads raise throughput. They do nothing for the latency of one request.'),
+    ('service', 'One reservation, five calls at once', 6, 'Show the service and every limit in it, before anything breaks.', [
+        S('“This is the service. One reservation holds four seats and charges one card, and it does all five at once on a managed executor.”',
+          tip='Start ./run.sh watch in the second terminal now if it is not running.'),
+        S('“The seat holds go through a pool of 20 database connections, about 10 ms each. The payment goes to a provider that takes 20 charges at a time, 50 ms each. Above 20 it says no: HTTP 429.”'),
+        S('“The executor has sixteen platform threads. Somebody chose sixteen years ago.”'),
+        S('“And the payment call has @Retry on it, the MicroProfile defaults. So far the provider has never said no, so it has never fired.”'),
     ]),
-    ('cheated', 'And I cheated', 9, 'Turn the good news into the first problem.', [
-        S('“And I cheated.” Pause.'),
-        S('“My database took a thousand queries at the same instant without blinking, because it was a sleep. A real database sits behind a connection pool, and the pool has a size. So let’s give the service a real limit and see what a thread per request does to it.”'),
+    ('before-run', 'The small sale on sixteen threads', 7.5, 'Run the small sale live on platform threads.', [
+        S('“A small sale. 60 reservations a second, then 120 more a second for six seconds.”'),
+        S('“Watch p99 on the k6 dashboard.”', run='./run.sh load before small',
+          tip='Expect p99 around one second during the sale and about 700 late. If the live run misbehaves, open results/before-small-7.html.'),
     ]),
-    ('demo1', 'Demo 1: the database slows down', 10, 'Set up the numbers the whole demo uses.', [
-        S('“Demo one. The same reservation service, now with numbers. 200 requests a second arrive. The pool has 8 database connections. A query takes 20 ms.”'),
+    ('switch', 'The switch', 9, 'Make the one-line switch live.', [
+        S('“So we do what everyone does. We switch to virtual threads.”'),
+        S('“And we follow the advice: never pool virtual threads. So maxAsync = 16 goes, and virtual = true comes in.”'),
+        S('“Same small sale.”', run='./run.sh state switched', tip='liberty:dev reloads in about a second. Then run ./run.sh load switched small.'),
     ]),
-    ('demo1-healthy', 'A healthy afternoon', 10, 'Show the system when nothing is wrong, so the failure has a baseline.', [
-        S('“This is that service on a normal afternoon, simulated live. Requests come in on the left, take a connection, run a 20 ms query and leave. Four or five in flight at any moment, and the chart at the bottom is flat.”',
-          tip='Optional: show OverloadUnbounded.java in the IDE. connections is the pool, handle() counts a request in and out, reserve() runs the query.'),
-        S('“The arithmetic: 8 connections at 20 ms each is 400 queries a second. We send 200. Half the capacity is spare. This is a healthy, boring system.”'),
+    ('small', 'Same sale, virtual threads', 10.5, 'Virtual threads delivered.', [
+        S('Plays the platform-thread run. “Sixteen threads: p99 a second during the sale. The executor is the queue.”'),
+        S('Plays the virtual-thread run over it. “Virtual threads: 72 milliseconds. Same sale. Faster. This is the slide everyone shows.”'),
     ]),
-    ('demo1-ask', 'How long is the service slow?', 12, 'Get a prediction, then run the real program.', [
-        S('“Now the database gets four times slower for three seconds. A missing index, a noisy neighbour, a backup. 80 ms a query, so capacity drops to 100 a second while 200 keep arriving.”'),
-        S('“A question for you. The database is slow for three seconds. How long is the service slow?” Take two answers, then switch.',
-          run='./run.sh overload',
-          tip='Read the lines aloud as they print. In flight: 4, 4, then 113, 218, 322. The database is back at second 6 while 187 are still in flight. The service is back at second 8. Last line: about 1,077 on time, 732 late, rejected 0.'),
+    ('big-ask', 'The launch', 12, 'Set up the climax and ask for a prediction.', [
+        S('“Now the launch. 700 a second, for three seconds. The same service, the same switch.”'),
+        S('“What happens to p99? Type your guess in the chat.”', run='./run.sh load switched big',
+          tip='Watch the second terminal: in flight climbs into the hundreds, retries pour in. Fallback: results/switched-big-1.html.'),
     ]),
-    ('demo1-what', 'Three seconds of slow database', 15, 'Make the invisible queue visible: 322 parked threads.', [
-        S('“The same run as a picture. On top, the service. Below, requests in flight over the nine seconds.”'),
-        S('Plays three seconds, then freezes. “The database slows down. Watch the pile. Every request still gets its own thread, and every thread parks waiting for one of eight connections: a hundred more every second. At five seconds there are 322 in flight, the oldest has waited 1.6 seconds, and everything in red has already missed the half-second deadline.”',
-          more='Nothing failed and nothing was logged. In production this pile is invisible: it is only parked threads.'),
-        S('Plays four seconds. “At five seconds the database is healthy again. Look at the chart: the service isn’t. It has to work off the backlog while new requests keep arriving, so it needs almost three more seconds.”'),
-        S('“Slow database for three seconds, slow service for five. 732 of 1,809 customers waited more than half a second. And we rejected nobody, so on a dashboard every one of those is a success.”'),
+    ('big', 'The launch: 700 a second', 13, 'The climax: p99 explodes.', [
+        S('“The small sale, faint, for reference.”'),
+        S('Plays the big sale and freezes. “p99: 2,325 milliseconds. 939 payments failed. 829 reservations in flight at once. Nothing crashed. No exception you would notice. It just stopped working for a thousand people.”',
+          tip='Stop talking for two seconds after the freeze.',
+          more='Across three runs p99 was 2.3 to 3.7 seconds. Quote the run on screen.'),
     ]),
-    ('demo1-why', 'The pool was your limit', 16, 'Explain why this never happened with platform threads.', [
-        S('“Why didn’t this happen before? With 200 platform threads, at most 200 requests could be inside the service. Nobody designed that as protection. It was an accident, but it was a limit.”'),
-        S('“With virtual threads every request gets in and parks on the pool. A parked thread costs almost nothing, so nothing pushes back, and the queue grows without bound.”'),
-        S('“That semaphore of eight is your HikariCP pool. In production these requests are parked inside getConnection(), and its default timeout is 30 seconds. So the symptom you actually see is a wall of connection-timeout exceptions half a minute later.”',
-          more='The exception is SQLTransientConnectionException: “Connection is not available, request timed out after 30000ms”.'),
-        S('“The standard advice for virtual threads is: limit concurrency with a semaphore, not with a pool. We already have one. It limits how many run. It does not limit how many wait. Those are two different limits, and we only have the first.”'),
+    ('flood', 'Where the queue moved', 15, 'Make the invisible queue visible.', [
+        S('“The same sale as a picture. Traffic on the left, the reservations in flight in the middle, the 20 connections, the provider.”'),
+        S('Plays three seconds, then freezes. “700 a second. Nothing makes anyone wait at the door, so they all go straight to the pool and the provider. 829 in flight. The red ones have already missed half a second. The provider is full and refusing charges.”'),
+        S('Plays on. “When the sale ends it drains in about three seconds.”'),
+        S('“The totals: 939 payments failed, 4,000 retries, and 9,061 seat holds had to queue for a connection.”'),
     ]),
-    ('demo1-fix', 'The fix: say no at the door', 19, 'Add the missing limit: how many may be inside at all.', [
-        S('“The fix is six lines in handle().”',
-          tip='Type them live in OverloadUnbounded.java if you like. OverloadBounded.java is the answer key.'),
-        S('“A second semaphore, called admission, with 32 permits. That is how many requests may be inside the service at all, running or waiting.”'),
-        S('“The important detail is tryAcquire, not acquire. If there is no permit we don’t wait at the door, we say no at once. Over HTTP that is a 503 with a Retry-After, and the caller still has time to do something useful.”'),
-        S('“And we always hand the permit back, in a finally.”'),
-        S('“Why 32? Eight are running, which leaves 24 waiting. At 80 ms a query the pool finishes about 100 a second, so 24 waiting is about 240 ms, plus the query itself: 330 ms, inside the 500 ms deadline. Pick the deadline first. The queue length follows from it.”',
-          run='./run.sh bounded',
-          tip='In flight stops at 32 (it can print 24 to 26, that is the sampling instant). Rejected climbs by about 100 a second and stops the moment the database is back. Last line: about 1,518 on time, 0 late, 291 rejected.'),
+    ('why', 'Sixteen threads were your limit', 17, 'Explain why this never happened before the switch.', [
+        S('“Why didn’t this happen before? Sixteen platform threads meant at most sixteen seat holds and payments at once. Nobody designed that as protection. It was an accident, but it was a limit.”'),
+        S('“With virtual threads every reservation starts all five calls at once. Parked threads are almost free, so nothing pushes back.”'),
+        S('“The limit moved to the 20 connections. 829 reservations queued for them.”'),
+        S('“Sixteen protected the database and the provider. Nobody wrote it down.”',
+          more='Honest note: the old version would have been far worse at the big sale (p99 11.7 seconds). It failed slowly and visibly in its own queue.'),
     ]),
-    ('demo1-door', 'A door in front of the pool', 22, 'Show the bounded service surviving the same slowdown.', [
-        S('“The same simulation with the door in front: at most 32 in flight.”'),
-        S('Plays three seconds, then freezes. “The database slows down again. In flight climbs to 32 and stops: eight running, 24 waiting. Every other arrival is turned away at once. The rejected counter climbs, but nobody inside waits longer than a third of a second.”'),
-        S('Plays on. “And when the database recovers, the service is back to normal within a tenth of a second, because there is no backlog to work off.”'),
+    ('storm', '@Retry was always there', 18.5, 'Show the retry storm.', [
+        S('“The provider takes 20 at a time. It refused 4,939 charges.”'),
+        S('“Each refusal was retried, up to three times. 4,000 retries, each one more load on a provider that was already full.”'),
+        S('“And 939 customers had their payment fail anyway.”'),
+        S('“That @Retry was always in the code. It never fired before the switch, because sixteen threads never sent more than the provider could take.”'),
     ]),
-    ('demo1-result', 'Say no to 291, say yes to 441 more', 23, 'Rejecting some requests got more requests served on time.', [
-        S('“The same 1,809 requests. Without the limit: 1,077 answered on time, 732 late.”'),
-        S('“With the limit: 1,518 on time, nobody late, 291 told no immediately.”'),
-        S('“Saying no to 291 people got 441 more people a fast yes. And a fast no beats a slow yes, because the caller can retry, fall back or show a message.”',
-          tip='If time: a limit of 64 lets 223 answers arrive late, the slowest at 730 ms. A limit of 8 keeps everyone under 88 ms and rejects only 35 more. “A queue absorbs a burst. In a long overload it adds latency and no capacity.”'),
+    ('check1', 'Check 1', 20, 'First take-home question.', [
+        S('“First check to take home.” Read it out. “If the honest answer used to be ‘the thread pool’, that limit is gone the day you switch.”'),
     ]),
-    ('check1', 'Check 1', 23.5, 'First take-home question, then the bridge to demo 2.', [
-        S('“First check to take home.” Read it out. “If the honest answer used to be ‘the thread pool’, that limit disappears the day you turn on virtual threads.” Then: “Demo one was about a pool: eight connections, a number somebody chose. Demo two is about a lock: one request at a time, and nobody chose that.”'),
+    ('rebuild', 'The rebuild', 21, 'Open part two.', [
+        S('“So we rebuild it. Not by going back to sixteen threads. By writing the limits down: a door in front, and a budget behind it for each dependency.”'),
     ]),
-    ('demo2', 'Demo 2: requests run one at a time', 24, 'Set up the reservation logic and its numbers.', [
-        S('“Demo two. Now the reservation logic itself. 40 seats, 50 customers arriving at the same moment, and charging a card takes 80 ms at the payment provider.”'),
+    ('door-code', 'A door: at most 24 inside', 21.5, 'Admission control in a Jakarta REST filter.', [
+        S('“The door is a Jakarta REST request filter with a semaphore.”'),
+        S('“The limit comes from config: 24.”'),
+        S('“tryAcquire, not acquire. If there is no room we don’t queue at the door, we answer 503 with Retry-After at once.”'),
+        S('“And the response filter hands the permit back on the way out.”'),
+        S('“Why 24? The provider does about 360 charges a second, and a reservation takes about 52 ms. Little’s law: 360 times 0.052 is about 19 inside at full speed. 24 leaves room for bursts.”'),
     ]),
-    ('demo2-ask', 'It must never oversell', 26, 'Show code that looks obviously correct, and get a wrong prediction.', [
-        S('“This is reserve(). If there are no seats left, say so. Otherwise charge the card, then take the seat. It must never sell seat 41, so the whole method is synchronized. Reviewed, correct, shipped.”',
-          tip='Point at the two marks: the yellow keyword is the lock, the boxed line is the 80 ms call.'),
-        S('“Fifty customers, fifty virtual threads, 80 ms each. Virtual threads are good at waiting. How long does this take?” Let someone say 80 ms, then switch.',
-          run='./run.sh wide', tip='It prints: confirmed 40, turned away 10, about 3,356 ms.'),
+    ('door', 'The same sale, with a door', 24, 'The door survives the big sale.', [
+        S('“The same simulation, with the door.”'),
+        S('Plays three seconds, then freezes. “In flight climbs to 24 and stops. Everyone else is turned away at once, and nobody inside waits.”'),
+        S('“926 told to try again at once, never more than 24 inside.”',
+          tip='Honest note if asked: with the door alone, 50 payments still failed, because 24 is more than the provider’s 20. The budgets fix that.'),
     ]),
-    ('demo2-wide', 'Correct, and one at a time', 28, 'The answer is right but slow: the lock lets one customer through at a time, however many threads there are.', [
-        S('The chart draws itself for about 3.4 seconds. Wait until it stops, then: “The result is correct. Forty seats, forty confirmed, ten turned away, nothing oversold. Now look at the clock: 3.4 seconds. The customers went through one at a time, and forty payments at 80 ms each is 3.2 seconds.”',
-          tip='Point at the three counters on the left as you name them: confirmed, turned away, clock.'),
-        S('“Here is how to read the chart. Each row is one customer, fifty rows, and time runs left to right. The yellow piece is the 80 ms in which that customer holds the lock and waits for the payment provider. The hatched part to its left is the same customer waiting for the lock. At the start one customer holds the lock and the other 49 are parked behind it. Each time one finishes, exactly one more gets in. Virtual threads make waiting cheap. They don’t make a lock hold two people.”',
-          tip='Trace one row with your finger: hatched first, then yellow. The last two sentences are the caption on the slide.',
-          more='Same shape as demo one. There the pool let eight requests run and the rest waited. Here the lock lets one run and the rest wait. The last ten customers also wait for the lock, find no seats left, and return at once.'),
+    ('budgets-code', 'maxAsync is back, as a budget', 26, 'The same attribute, now a budget per dependency.', [
+        S('“Behind the door, one executor per dependency.”'),
+        S('“Seat holds get maxAsync = 20, because the pool has 20 connections.”'),
+        S('“Payments get maxAsync = 20, because the provider takes 20 at a time. Work past the budget waits in our executor, not as a 429.”'),
+        S('“It is the same attribute we deleted. Now it is a budget, not a thread count. Virtual threads stay on.”', run='./run.sh state budgeted',
+          more='@Bulkhead(20) from MicroProfile Fault Tolerance is another way to write the payment budget.'),
     ]),
-    ('pinning', 'Is that pinning?', 29, 'Someone will ask “isn’t that just pinning?”. Answer it first: pinning was a different problem, it is fixed, and our slow lock is still there.', [
-        S('The top chart plays for about a second. Then: “Some of you are thinking: that is the pinning problem. It is not, and I want to show you the difference. Pinning was this. On JDK 21, when a virtual thread had to wait inside a synchronized block, it could not step aside. It kept its carrier thread busy for the whole wait. Here is a test for exactly that: twenty tasks, only two carrier threads, and each task sleeps 100 ms inside its own lock. Nobody shares a lock, so nobody should wait for anybody. But on JDK 21 only two could sleep at a time. Ten rounds of 100 ms: a full second.”',
-          run='./run.sh pinning',
-          tip='Run it after you have explained the test. On JDK 25 it prints about 108 ms. The 1,037 ms on the slide is what this laptop measured on JDK 21.'),
-        S('The lower chart plays. Then: “JDK 24 fixed this, in JEP 491. Same code on JDK 25: a virtual thread that waits inside synchronized now steps aside, even though it still holds the lock. Both carrier threads are free straight away, so all twenty tasks sleep at the same time. About a tenth of a second instead of a full second.”',
-          tip='Point at the two clocks: 1,037 ms above, 108 ms below.'),
-        S('“So pinning is fixed, and our reservation still takes 3.4 seconds. Why? Pinning was about a carrier thread being held up. Our problem is different: fifty customers all need the same lock, and a lock lets one in at a time. No JDK release changes that. Pinning was the JVM’s problem. The wide lock is ours.”',
-          tip='The last two sentences are the caption on the slide.',
-          more='A carrier thread is one of the few real threads that virtual threads take turns running on. On JDK 25 a virtual thread can still hold on to its carrier while it waits inside native code or inside a class initializer.'),
+    ('rebuilt', 'The same launch, limits written down', 28.5, 'The rebuilt service at the big sale.', [
+        S('“The same launch. The broken run, faint.”', run='./run.sh load budgeted big',
+          tip='Fallback: results/budgets-big-1.html.'),
+        S('Plays the rebuilt run. “p99: 114 milliseconds. The grey columns are the people told to try again: 991. And not one payment failed.”'),
     ]),
-    ('demo2-fix', 'The fix: charge outside the lock', 32, 'Narrow the lock to the shared state, and pay for it with an undo.', [
-        S('“The fix changes what the lock covers.”',
-          tip='Or show ContentionNarrow.java next to ContentionWide.java in the IDE.'),
-        S('“Take the seat under the lock: check, decrement, done. That is microseconds.”'),
-        S('“Then charge the card with no lock held. Forty of these can now overlap.”'),
-        S('“But we took the seat before the money arrived. If the charge fails we have to give it back, under the lock again. That is the price of a narrow lock: you need an undo.”',
-          more='This is the hold, confirm, cancel shape. A real system also puts an expiry on the hold.'),
-        S('Switch to the terminal.', run='./run.sh narrow', tip='It prints: confirmed 40, turned away 10, about 92 ms.'),
+    ('result', 'Saying no to 991 people', 30.5, 'Refusing some got more served on time.', [
+        S('“Saying no to 991 people got 1,080 more a fast yes.”', more='2,731 on time rebuilt, against 1,651 switched.'),
+        S('“And nobody’s payment failed. A fast no beats a slow yes and a failed charge.”'),
     ]),
-    ('demo2-narrow', 'Same answer, 36 times faster', 35, 'Same correctness, a fraction of the time.', [
-        S('Plays in real time and is over in a blink. “This is the same time axis as the wide run. That sliver at the left edge is the entire run: 92 ms.”'),
-        S('Zooms in and replays slowly. “Zoomed in to the first 100 ms. Forty tiny lock holds, one after another, just to count seats. Then forty charges at the same time, with no lock held. Same answer, 40 confirmed and 10 turned away, 36 times faster.”'),
+    ('check2', 'Check 2', 32, 'Second take-home question.', [
+        S('“Second check.” Read it out. “Sixteen was a number left over from a thread pool. Twenty and twenty came from the dependencies.”'),
     ]),
-    ('demo2-hides', 'Where it hides', 36, 'Help them recognise the pattern in their own code.', [
-        S('“Where this hides in real code. A synchronized cache loader that calls the database.”',
-          more='ConcurrentHashMap.computeIfAbsent with a slow loader does it too: it blocks other updates to that part of the map while the loader runs.'),
-        S('“A token refresh under a lock. Every request waits while one thread calls the auth server.”'),
-        S('“A database row lock, SELECT FOR UPDATE, held across an HTTP call. The lock lives in the database, but it is the same shape.”'),
-        S('“With 200 threads you may never have noticed, because the pool was the bigger queue. With a thread per request, the lock is the only queue left.”'),
+    ('deadlines', 'Deadlines', 33, 'Open part three.', [
+        S('“Part three. The provider has a bad day: 1,800 ms a charge. The customer waits 500.”'),
     ]),
-    ('check2', 'Check 2', 37, 'Second take-home question, then the bridge to demo 3.', [
-        S('“Second check.” Read it out. “Search for synchronized and for lock(), and look at what happens before the unlock.” Then: “The payment provider answered in 80 ms. What if it doesn’t? We put a timeout on it, of course.”'),
+    ('deadline-code', 'We answer at 500 ms', 33.5, 'Show the deadline everyone writes.', [
+        S('“orTimeout on the combined future. At 500 ms the customer gets a 504 and a message to try again.”'),
+        S('“What happens to the payment?”'),
     ]),
-    ('demo3', 'Demo 3: work continues after a timeout', 38, 'Set up the slow payment provider.', [
-        S('“Demo three. The payment provider has a bad day: 1,800 ms an answer. We are not going to make the customer wait for that. We wait 200.”'),
+    ('leak', 'We said it failed. Then we charged.', 34.5, 'The customer left. The work stayed.', [
+        S('Plays in real time. Stay silent until it stops. “At 507 ms we told the customer it failed. At 1,850 ms we charged the card.”'),
+        S('“And the customer presses retry. That is a second charge on its way.”'),
+        S('“orTimeout limits how long the customer waits. It says nothing to the work.”'),
     ]),
-    ('demo3-ask', 'We won’t make them wait', 40, 'Show the timeout everyone writes, and ask what it does to the work.', [
-        S('“The usual way: submit the work, then call get with a timeout of 200 ms. If it times out, we log it and tell the customer to try again.”',
-          tip='Point at the highlighted get(200, MILLISECONDS).'),
-        S('“So at 200 ms the customer is told: timed out, try again. What happens to the payment?” Let them answer, then switch.',
-          run='./run.sh leak',
-          tip='Four lines: charging card, timed out at about 205 ms, card charged at about 1,812 ms, handler returned at about 1,812 ms.'),
+    ('cancel-code', 'The fix: cancel the work', 35.5, 'Cancel every part at the deadline.', [
+        S('“The fix: when the deadline fires, cancel every part.”'),
+        S('“One line: part.cancel(true).”'),
+        S('“A detail worth knowing: on Liberty, cancel(true) on a managed CompletableFuture interrupts the task. On a plain JDK CompletableFuture it does nothing to the running task.”'),
     ]),
-    ('demo3-leak', 'We said it failed. Then we charged.', 42, 'The caller stopped waiting. Nothing told the work to stop.', [
-        S('Plays 1.8 seconds in real time. Stay silent until “card charged” lands. “At 205 ms we told the customer it failed. At 1,812 ms we charged the card.”',
-          tip='Point at the caller track: the handler itself was stuck until 1,812 ms, because closing the executor waits for the task. With a shared executor it would return at 200 ms and the charge would happen where nobody is looking.'),
-        S('“The customer does what we told them and presses retry. That is a second charge on its way.”'),
-        S('“get with a timeout limits how long the caller waits. It says nothing to the task. CompletableFuture.orTimeout is the same, and on a CompletableFuture even cancel(true) interrupts nothing.”',
-          more='The CompletableFuture documentation says the mayInterruptIfRunning argument “has no effect in this implementation”.'),
+    ('cancel', 'Cancelled at 507 ms', 36, 'Cancel stops your call, not the charge.', [
+        S('Plays. “Timed out at 506, payment call cancelled at 507. The last run’s long bar is the ghost.”'),
+        S('“But look at the provider. It already had the request, and it charged the card anyway. Cancel stops your call. It does not un-send the charge.”',
+          more='Measured: with cancel, the provider still logged one charge.'),
     ]),
-    ('demo3-fix', 'The fix: cancel the work', 45, 'One line stops the work, when the work cooperates.', [
-        S('“The fix is one line in the catch block.”',
-          tip='Type it live in TimeoutLeak.java if you like. TimeoutCancel.java is the answer key.'),
-        S('“reservation.cancel(true). The true means: interrupt the thread that is running it.”'),
-        S('“It works when the task is blocked in something interruptible: a sleep, a socket read, a lock wait. It fails when the task swallows InterruptedException and carries on, or burns CPU and never checks.”',
-          run='./run.sh cancel',
-          tip='If time: delete throw e; in reserve() and run again. It prints payment cancelled, then card charged in the same millisecond. Put the line back.'),
+    ('key', 'Charge each reservation once', 37, 'Idempotency keys make the retry safe.', [
+        S('“So the retry has to be safe. The customer sends an Idempotency-Key, and we pass it to the provider.”'),
+        S('“Without a key the retry is a new reservation: two charges, eight seat holds. With the key the retry finds the first charge: 201 in 26 milliseconds, four seat holds.”'),
+        S('“Charged once.”'),
     ]),
-    ('demo3-cancel', 'Cancelled at 209 ms', 46, 'Show what was saved, and the two ways this fix still fails.', [
-        S('Plays. “Timed out at 209 ms, cancelled at 209 ms, handler returned at 209 ms. The faint bar is the 1.6 seconds of work we no longer do.”'),
-        S('“Two catches. Interruption is a request: the bottom row is the same task with the exception swallowed, and the card is charged anyway. And you have to remember to cancel on every path: every timeout, every early return, every exception.”'),
+    ('scope', 'Where this is going', 38, 'Structured concurrency owns the deadline.', [
+        S('“Where this is going: structured concurrency. The scope owns the deadline, and nothing leaves the scope while its work runs.”'),
+        S('“It is a preview in JDK 25, and this is plain Java from my last talk, not Liberty yet.”'),
+        S('“Cancelled at 207, reported at 208: the work stops before the customer is told.”'),
     ]),
-    ('demo3-scope', 'Better: the scope owns the deadline', 48, 'Structured concurrency makes forgetting impossible.', [
-        S('“Structured concurrency takes the remembering away. The work is forked inside a scope, and you cannot leave the scope while the work is still running.”'),
-        S('“The deadline is a property of the scope: withTimeout, 200 ms.”'),
-        S('“fork starts the task in its own virtual thread, join waits for it. If the deadline passes, the scope interrupts everything it forked, and it does not let you out of the try block until that work has actually stopped.”'),
-        S('“It is a preview API in JDK 25, JEP 505, the fifth preview, and its shape changed in this release. So you need --enable-preview, and you should expect to touch this code again.”',
-          run='./run.sh structured',
-          more='Up to JDK 24 this was new StructuredTaskScope.ShutdownOnFailure(). JDK 25 uses open() with a Joiner.'),
+    ('check3', 'Check 3', 38.5, 'Third take-home question.', [
+        S('“Third check.” Read it out.'),
     ]),
-    ('demo3-order', 'Cancelled first, reported second', 49, 'The order of events is the guarantee.', [
-        S('Plays. “The same timeline, with the scope drawn around both tracks.”'),
-        S('“Read the order. One: payment cancelled, at 207. Two: timeout reported, at 208. Three: handler returned. With the future we told the customer first and cancelled second, if we remembered. Here the work is already gone when our catch block runs. Fork three tasks instead of one and all three are cancelled.”'),
+    ('watch-list', 'What to watch', 39, 'The metrics that warn before collapse.', [
+        S('“What to watch. Requests in flight: 829 at the big sale, 24 behind the door.”'),
+        S('“Waits for a connection. Liberty publishes it as a connection-pool metric.”'),
+        S('“Retries. Each one is more load.”'),
+        S('“Refusals: the 429s you get and the 503s you give. The first is a warning, the second is your protection working.”'),
+        S('“And p99 second by second. An average over the run hides a sale.”'),
     ]),
-    ('demo3-tieback', 'The callers left. The work stayed.', 50, 'Tie the three demos together.', [
-        S('“Remember the 322 requests in flight in demo one?”'),
-        S('“Their callers had timeouts too. Browsers, gateways, other services.”'),
-        S('“The callers left. The work stayed. A lot of that backlog was work nobody was waiting for any more. The three demos are one problem seen from three sides.”'),
+    ('checks', 'Three checks to take home', 40.5, 'Leave them with something to do on Monday.', [
+        S('“Three checks for Monday.” Read them. Leave the slide up for a moment.'),
     ]),
-    ('check3', 'Check 3', 50.5, 'Third take-home question.', [
-        S('“Third check.” Read it out. “Find every get with a timeout and every orTimeout, and ask what stops the work.”'),
+    ('jobs', 'Threads got free. Nothing else did.', 41.5, 'The whole talk in one slide.', [
+        S('“Threads got free. Nothing else did. Sixteen threads were doing three jobs nobody gave them.”'),
+        S('“Keeping the database under its 20 connections.”'),
+        S('“Keeping the provider under its limit, so @Retry never fired.”'),
+        S('“Being the one number in the system that said ‘enough’.”'),
+        S('“Those jobs are yours now.”'),
     ]),
-    ('jobs', 'Threads got free. Nothing else did.', 51, 'The whole talk in one slide.', [
-        S('“Here is the whole talk in one slide. Virtual threads made threads free. Nothing else got cheaper: not database connections, not locks, not the payment provider. And the thread pool was quietly doing three jobs nobody gave it.”'),
-        S('“It limited the load on the database.” That was demo one.'),
-        S('“It hid wide locks, because the pool was the bigger queue.” Demo two.'),
-        S('“It capped how much abandoned work could pile up.” Demo three.'),
-        S('“Those jobs are yours now. That is not an argument against virtual threads. It is the list of things to do when you turn them on.”'),
+    ('thanks', 'Thank you', 42.5, 'Close, point at the code, open the floor.', [
+        S('“Thank you. The code is on GitHub, and ./run.sh state before, switched, budgeted, deadlines puts every version in front of you.”'),
     ]),
-    ('checks', 'Three checks to take home', 52, 'Leave them with something to do on Monday.', [
-        S('“Three checks for Monday morning.” Read them. Leave the slide up long enough for photos.'),
+    ('links', 'The long version', 43, 'Leave this up during questions.', [
+        S('“If you want the long version, it is in the book. The QR code goes there.” Then take questions from the chat.'),
     ]),
-    ('thanks', 'Thank you', 54, 'Close, point at the code, open the floor.', [
-        S('“Every demo is one file, and the address is on the slide. Thank you. Questions?”',
-          tip='One more click: the last slide has the book and your links. Leave it up for the questions.',
-          more='Short answers to the likely questions are at the end of the phone cue sheet, under “Questions you may get”.'),
-    ]),
-    ('links', 'The long version', 55, 'Leave this up during questions: the book, and where to find you.', [
-        S('“Today was three demos. The long version is this book: Modern Concurrency in Java, from O’Reilly. The QR code on the left takes you to it. The demos are on GitHub, and this is where to find me. I will leave this up while we take questions.”',
-          tip='Stay on this slide for the whole Q&A so people can photograph it.',
-          more='The QR code opens the book on learning.oreilly.com, the same link bazlur.com uses.'),
+    ('pinning', 'Is that pinning?', 45, 'Backup for questions: pinning was a different problem, and it is fixed.', [
+        S('The top chart plays. “Pinning was this: on JDK 21 a virtual thread waiting inside synchronized held its carrier. Twenty tasks, two carriers, a full second.”'),
+        S('The lower chart plays. “JDK 24 fixed it in JEP 491. The same code on JDK 25: about a tenth of a second.”'),
+        S('“So pinning is fixed, and it is not why our service broke at the big sale. Pinning was the JVM’s problem. The limits are ours.”'),
     ]),
 ]
 

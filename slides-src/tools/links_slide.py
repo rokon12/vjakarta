@@ -13,7 +13,7 @@ BUILD = pathlib.Path(__file__).resolve().parent.parent
 BOOK_URL = 'https://learning.oreilly.com/library/view/modern-concurrency-in/9781098165406/'
 LINKS = [
     ('Web', 'bazlur.com'),
-    ('GitHub', 'rokon12/vfun'),
+    ('GitHub', 'rokon12/vjakarta'),
     ('X', '@bazlur_rahman'),
     ('Bluesky', '@bazlur.ca'),
     ('LinkedIn', 'in/bazlur'),

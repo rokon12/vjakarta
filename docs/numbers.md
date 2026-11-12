@@ -39,6 +39,7 @@ The line: "Same sale. A second at p99 on sixteen threads, seventy milliseconds o
 - `budgeted` turned away 991 people at once (503). "Saying no to 991 people got 1,080 more a fast yes, and nobody's payment failed." (2,731 − 1,651 = 1,080.)
 - `before` is worse than `switched` at the big sale. Say so.
 - The door: 24 in flight. Budgets: seat holds 20 at a time (the pool), payments 20 at a time (the provider).
+- Door only (before the budgets): 926 turned away at once, 50 payments still failed, because 24 is more than the provider's 20.
 
 ## Deadlines (`deadlines` tag, provider at 1,800 ms, one request)
 

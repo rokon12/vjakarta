@@ -220,7 +220,7 @@ slide('21-budgets-code.html', 'budgets-code', 'code', 'maxAsync is back, as a bu
       'var payment = paymentExecutor.runAsync(…);',
   ], source=at(('budgeted', 'TicketsApplication.java'), ('budgeted', 'Reservations.java')))}
   <div class="note" style="left:1150px;top:640px;--tilt:-2deg" data-step="1">seat holds:<br>the pool has 20</div>
-  <div class="note" style="left:1500px;top:640px;--tilt:-2deg" data-step="2">payments:<br>the provider takes 20</div>
+  <div class="note" style="left:1500px;top:640px;--tilt:-2deg" data-step="2">payments:<br>provider takes 20</div>
   <div class="cond" style="left:110px;top:600px" data-step="3"><span>Same attribute</span><b>now it is a budget, not a thread count</b></div>
   {cue('./run.sh state budgeted', step=3)}
 ''')

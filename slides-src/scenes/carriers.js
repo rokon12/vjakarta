@@ -69,7 +69,7 @@ function platform(root, ctx) {
       ctx.cancel();
       cost.setAttribute('visibility', step >= 1 ? 'visible' : 'hidden');
       queueLabel.setAttribute('visibility', step >= 2 ? 'visible' : 'hidden');
-      poolLabel.textContent = step >= 2 ? 'THE POOL · TOMCAT’S DEFAULT: 200 THREADS' : 'A POOL OF PLATFORM THREADS';
+      poolLabel.textContent = step >= 2 ? 'THE POOL · OURS HAD 16 THREADS' : 'A POOL OF PLATFORM THREADS';
       draw(1.5);
       ctx.loop((dt, t) => draw(1.5 + t));
     },
