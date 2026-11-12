@@ -23,10 +23,19 @@ db() {
   echo "database ready on :5432"
 }
 
+load() {
+  local name=${1:?name the run, for example ./run.sh load before}
+  mkdir -p results
+  K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_EXPORT="results/$name.html" K6_CSV_TIME_FORMAT=unix_milli \
+    run k6 run -q --out csv="results/$name.csv" load/flash-sale.js
+  python3 tools/series.py "results/$name.csv"
+}
+
 case "$1" in
   db)       db ;;
   reset)    psql -c 'truncate holds' && echo "holds emptied" ;;
   provider) run java -Dlimit="${LIMIT:-20}" -Dmillis="${MILLIS:-50}" provider/PaymentProvider.java ;;
   app)      run mvn -q liberty:dev ;;
-  *)        echo "usage: ./run.sh db|reset|provider|app" ;;
+  load)     load "$2" ;;
+  *)        echo "usage: ./run.sh db|reset|provider|app|load <name>" ;;
 esac
