@@ -56,3 +56,21 @@ At the big sale, p99 in `switched` is 30 to 60 times its small-sale p99, and bac
 ## Why p99 explodes at the big sale, in plain English
 
 700 requests a second arrive and nothing makes any of them wait at the door. Each one starts five tasks at once: four seat holds and a payment. The four seat holds need a connection each, and there are 20, so thousands of them queue for a connection (about 9,000 waits per run). The payments go straight to the provider, which can only take 20 at a time; it refuses about 4,800 charges. Each refusal is retried up to three times, so the provider gets even more traffic. About 920 customers end up with a failed payment, and the ones who get through wait seconds for their connections.
+
+## `budgeted`
+
+Built in two commits, measured at both sales after each.
+
+| run | p50 ms | p99 ms | on time | late | refused (503) | failed | in flight max | retries | connection waits | provider refused |
+|---|---|---|---|---|---|---|---|---|---|---|
+| door only, big | 52 | 196 | 2,744 | 1 | 926 | 50 | 24 | 243 | 3,918 | 293 |
+| door only, small | 52 | 67 | 2,521 | 0 | 0 | 0 | 10 | 0 | 39 | 0 |
+| door + budgets, big, 1 | 52 | 114 | 2,731 | 0 | 991 | 0 | 24 | 0 | 0 | 0 |
+| door + budgets, big, 2 | 52 | 397 | 2,721 | 20 | 980 | 0 | 24 | 0 | 0 | 0 |
+| door + budgets, big, 3 | 52 | 84 | 2,752 | 0 | 970 | 0 | 24 | 0 | 0 | 0 |
+| door + budgets, small, 1 | 52 | 62 | 2,521 | 0 | 0 | 0 | 11 | 0 | 0 | 0 |
+| door + budgets, small, 2 | 51 | 57 | 2,521 | 0 | 0 | 0 | 11 | 0 | 0 | 0 |
+
+At the big sale, compared with `switched`: about 2,730 on time instead of about 1,650, no late answers instead of about 1,130, no failed payments instead of about 920, and about 980 people told "try again" at once. Per second (run 1) p99 stays at 85–91 ms during the sale and is back to 58 ms the second it ends.
+
+Not added, because they would change nothing at this load once the budgets were in: a per-request fan-out limit, `@Bulkhead`, a gentler retry policy.
