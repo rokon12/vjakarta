@@ -15,6 +15,7 @@ public class SeatHolds {
     private static final String HOLD = """
             insert into holds (reservation_id, show_id, seat)
             select ?, ?, ? from pg_sleep(?)
+            on conflict do nothing
             """;
 
     @Resource(lookup = "jdbc/tickets")

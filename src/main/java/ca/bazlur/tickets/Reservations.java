@@ -40,8 +40,7 @@ public class Reservations {
     @ConfigProperty(name = "reservation.deadline.millis", defaultValue = "500")
     long deadlineMillis;
 
-    public CompletionStage<Reservation> reserve(ReservationRequest request) {
-        var id = UUID.randomUUID();
+    public CompletionStage<Reservation> reserve(ReservationRequest request, UUID id) {
         var started = System.nanoTime();
         var holds = IntStream.range(0, request.seats())
                 .mapToObj(seat -> seatHoldExecutor.runAsync(() -> seatHolds.hold(id, request.show(), seat)));

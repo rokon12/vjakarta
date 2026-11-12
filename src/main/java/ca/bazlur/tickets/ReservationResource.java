@@ -2,12 +2,14 @@ package ca.bazlur.tickets;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.util.UUID;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.TimeoutException;
@@ -25,8 +27,8 @@ public class ReservationResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public CompletionStage<Response> reserve(ReservationRequest request) {
-        return reservations.reserve(request)
+    public CompletionStage<Response> reserve(ReservationRequest request, @HeaderParam("Idempotency-Key") UUID key) {
+        return reservations.reserve(request, key == null ? UUID.randomUUID() : key)
                 .thenApply(reservation -> Response.status(CREATED).entity(reservation).build())
                 .exceptionally(ReservationResource::failed);
     }

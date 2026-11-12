@@ -36,7 +36,8 @@ public class Payments {
 
     @Retry(retryOn = PaymentRefused.class)
     public void charge(UUID reservation, int cents) {
-        try (var response = client.target(url).request().post(Entity.json(new Charge(reservation, cents)))) {
+        var request = client.target(url).request().header("Idempotency-Key", reservation);
+        try (var response = request.post(Entity.json(new Charge(reservation, cents)))) {
             if (response.getStatus() == 429) {
                 throw new PaymentRefused();
             }
