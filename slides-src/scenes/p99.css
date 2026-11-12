@@ -1,0 +1,12 @@
+.p99-speed {
+  margin: 0 0 22px;
+  font-family: var(--dc);
+  font-size: 34px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+.ro.p99-hidden { visibility: hidden; }
+
+.ro .un.p99-unit { width: 84px; }
