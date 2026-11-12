@@ -35,11 +35,39 @@ load() {
   python3 tools/series.py "results/$name.csv"
 }
 
+state() {
+  run git checkout -q "${1:?which state: before, switched, budgeted, deadlines or main}"
+  grep -h "@ManagedExecutorDefinition" src/main/java/ca/bazlur/tickets/TicketsApplication.java
+}
+
+sum() {
+  awk -v pattern="$2" '$0 ~ pattern {s += $2} END {printf "%d", s}' <<< "$1"
+}
+
+watch() {
+  local waits retries refused previous=""
+  while true; do
+    local metrics; metrics=$(curl -s localhost:9080/metrics)
+    local now_waits now_retries now_refused
+    now_waits=$(sum "$metrics" '^connectionpool_queuedRequests_total')
+    now_retries=$(sum "$metrics" '^ft_retry_retries_total')
+    now_refused=$(sum "$metrics" 'door_refused_total')
+    if [ -n "$previous" ]; then
+      printf "in flight %4d   waited for a connection %5d   retries %5d   turned away %4d\n" \
+        "$(sum "$metrics" '^in_flight')" $((now_waits - waits)) $((now_retries - retries)) $((now_refused - refused))
+    fi
+    waits=$now_waits retries=$now_retries refused=$now_refused previous=1
+    sleep 1
+  done
+}
+
 case "$1" in
   db)       db ;;
   reset)    psql -c 'truncate holds' && echo "holds emptied" ;;
   provider) run java -Dlimit="${LIMIT:-20}" -Dmillis="${MILLIS:-50}" provider/PaymentProvider.java ;;
   app)      run mvn -q liberty:dev ;;
+  state)    state "$2" ;;
   load)     load "$2" "$3" ;;
-  *)        echo "usage: ./run.sh db|reset|provider|app|load <name> small|big" ;;
+  watch)    watch ;;
+  *)        echo "usage: ./run.sh db|reset|provider|app|state <tag>|load <name> small|big|watch" ;;
 esac
