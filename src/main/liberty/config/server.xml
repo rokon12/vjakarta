@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<server description="tickets">
+
+    <featureManager>
+        <feature>webProfile-11.0</feature>
+        <feature>mpFaultTolerance-4.1</feature>
+        <feature>mpMetrics-5.1</feature>
+        <feature>mpConfig-3.1</feature>
+    </featureManager>
+
+    <httpEndpoint id="defaultHttpEndpoint" host="*" httpPort="9080" httpsPort="9443"/>
+
+    <mpMetrics authentication="false"/>
+
+    <library id="postgres">
+        <fileset dir="${shared.resource.dir}/jdbc" includes="postgresql-*.jar"/>
+    </library>
+
+    <dataSource id="tickets" jndiName="jdbc/tickets">
+        <jdbcDriver libraryRef="postgres"/>
+        <connectionManager maxPoolSize="20"/>
+        <properties.postgresql serverName="localhost" portNumber="5432" databaseName="tickets"
+                               user="tickets" password="tickets"/>
+    </dataSource>
+
+    <webApplication location="tickets.war" contextRoot="/"/>
+
+</server>
