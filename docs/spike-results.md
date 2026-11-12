@@ -92,3 +92,25 @@ Probe (not committed): the same plus `part.cancel(true)` on every part at the de
 So on Liberty, `cancel(true)` on a managed `CompletableFuture` does interrupt the running task (a plain JDK `CompletableFuture` does not; this is Liberty's behaviour, not the spec's). The virtual thread blocked on the socket is woken and the socket is closed.
 
 But the provider's own log says `1 charged`: it had the request and finished the charge anyway. Cancelling stops our work and frees our connection and executor slot; it does not un-send a request to another service. In vfun the payment was local, so cancelling saved the card. Here the customer is told to try again and has already been charged; a retry charges again unless the provider deduplicates (an idempotency key) or is told the deadline.
+
+## `deadlines`, as built (the speaker chose the honest version, November 12)
+
+Three commits: the 500 ms deadline (the leak), `cancel(true)` at the deadline, the idempotency key. Not added: `@Timeout` on the payment call and a short connection wait timeout, because the request deadline and the cancel already cover them here.
+
+One request, provider at 1,800 ms a charge:
+
+| version | what the log says | what the provider did |
+|---|---|---|
+| deadline only | `1 ms charging card` / `507 ms timed out, customer told to try again` / `1850 ms card charged` | charged |
+| + cancel | `1 ms charging card` / `506 ms timed out, customer told to try again` / `507 ms payment call cancelled` | charged anyway |
+| + idempotency key, then the customer retries 2.5 s later with the same key | attempt 1: 504 after 0.52 s, call cancelled at 507 ms; attempt 2: `0 ms charging card` / `3 ms card charged`, 201 after 0.026 s | 1 charged, 1 already charged; 4 seat holds |
+| no key, the customer retries 2.5 s later | both attempts 504 after about 0.52 s | 2 charged; 8 seat holds in 2 reservations |
+
+Under load, provider back at 50 ms:
+
+| run | p50 ms | p99 ms | on time | late | refused (503) | failed | in flight max | retries | connection waits | provider refused |
+|---|---|---|---|---|---|---|---|---|---|---|
+| deadlines, big | 52 | 92 | 2,706 | 0 | 1,015 | 0 | 24 | 0 | 0 | 0 |
+| deadlines, small | 52 | 92 | 2,521 | 0 | 1 | 0 | 11 | 0 | 0 | 0 |
+
+The one refusal at the small sale is a burst past 24 at the door.
