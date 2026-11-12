@@ -145,7 +145,7 @@ Deck.scene('p99', (root, args, ctx) => {
   const firstRows = readouts(mode.first);
   const secondRows = readouts(mode.second);
   root.append(el('div', { class: 'readouts', style: { left: `${chart.x + chart.w + 70}px`, top: `${chart.y}px`, width: '610px' } }, [
-    el('p', { class: 'p99-speed', text: '30 s of each run, played at 3× speed' }), ...firstRows, ...secondRows,
+    el('p', { class: 'p99-speed', text: '30 s of each recorded run, at 3× speed' }), ...firstRows, ...secondRows,
   ]));
   const reveal = (rows, on) => rows.forEach(row => row.classList.toggle('p99-hidden', !on));
 

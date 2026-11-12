@@ -38,7 +38,7 @@ SLIDES = [
     ]),
     ('one-line', 'Turning them on is one line', 1, 'Switching them on is trivial. The consequences are not in the diff.', [
         S('“In Jakarta EE 11, Jakarta Concurrency 3.1 lets a managed executor run on virtual threads. It is one attribute: virtual = true.”'),
-        S('“Java 21 or later, and any Jakarta EE 11 server. I use Open Liberty today, but nothing here is Liberty-specific until I say so.”'),
+        S('“Java 21 or later, and a Jakarta EE 11 server with Concurrency 3.1: Web Profile or the full platform. I use Open Liberty today, but nothing here is Liberty-specific until I say so.”'),
         S('“Nothing in this diff looks like a bug in code review. Keep that in mind.”'),
     ]),
     ('plan', 'One service, two sales, one rebuild', 2, 'Give the map of the talk.', [
@@ -70,7 +70,7 @@ SLIDES = [
     ('service', 'One reservation, five calls at once', 6, 'Show the service and every limit in it, before anything breaks.', [
         S('“This is the service. One reservation holds four seats and charges one card, and it does all five at once on a managed executor.”',
           tip='Start ./run.sh watch in the second terminal now if it is not running.'),
-        S('“The seat holds go through a pool of 20 database connections, about 10 ms each. The payment goes to a provider that takes 20 charges at a time, 50 ms each. Above 20 it says no: HTTP 429.”'),
+        S('“The seat holds go through a pool of 20 database connections, about 10 ms each. The payment goes to a provider that takes 20 charges at a time, 50 ms each. Above 20 it says no: HTTP 429. Two things are simulated, and I want to say so: the 10 ms is a pg_sleep in the query, and the provider is a small fake that sleeps 50 ms. Everything else is real Liberty, real PostgreSQL and real k6.”'),
         S('“The executor has sixteen platform threads. Somebody chose sixteen years ago.”'),
         S('“And the payment call has @Retry on it, the MicroProfile defaults. So far the provider has never said no, so it has never fired.”'),
     ]),
@@ -82,10 +82,10 @@ SLIDES = [
     ('switch', 'The switch', 9, 'Make the one-line switch live.', [
         S('“So we do what everyone does. We switch to virtual threads.”'),
         S('“And we follow the advice: never pool virtual threads. So maxAsync = 16 goes, and virtual = true comes in.”'),
-        S('“Same small sale.”', run='./run.sh state switched', tip='liberty:dev reloads in about a second. Then run ./run.sh load switched small.'),
+        S('“Same small sale.”', run='./run.sh load switched small', tip='First ./run.sh state switched; liberty:dev reloads in about a second. Fallback: results/switched-small-7.html.'),
     ]),
     ('small', 'Same sale, virtual threads', 10.5, 'Virtual threads delivered.', [
-        S('Plays the platform-thread run. “Sixteen threads: p99 a second during the sale. The executor is the queue.”'),
+        S('Plays the platform-thread run. “These charts are the recorded rehearsal runs, so your live numbers just now will be close, not identical. Sixteen threads: p99 a second during the sale. The executor is the queue.”'),
         S('Plays the virtual-thread run over it. “Virtual threads: 72 milliseconds. Same sale. Faster. This is the slide everyone shows.”'),
     ]),
     ('big-ask', 'The launch', 12, 'Set up the climax and ask for a prediction.', [
@@ -100,7 +100,7 @@ SLIDES = [
           more='Across three runs p99 was 2.3 to 3.7 seconds. Quote the run on screen.'),
     ]),
     ('flood', 'Where the queue moved', 15, 'Make the invisible queue visible.', [
-        S('“The same sale as a picture. Traffic on the left, the reservations in flight in the middle, the 20 connections, the provider.”'),
+        S('“The same sale as a picture. This is a simulation, calibrated to the recorded run: it reads 829 in flight at the same moment the real run did. Traffic on the left, the reservations in flight in the middle, the 20 connections, the provider.”'),
         S('Plays three seconds, then freezes. “700 a second. Nothing makes anyone wait at the door, so they all go straight to the pool and the provider. 829 in flight. The red ones have already missed half a second. The provider is full and refusing charges.”'),
         S('Plays on. “When the sale ends it drains in about three seconds.”'),
         S('“The totals: 939 payments failed, 4,000 retries, and 9,061 seat holds had to queue for a connection.”'),
@@ -108,9 +108,8 @@ SLIDES = [
     ('why', 'Sixteen threads were your limit', 17, 'Explain why this never happened before the switch.', [
         S('“Why didn’t this happen before? Sixteen platform threads meant at most sixteen seat holds and payments at once. Nobody designed that as protection. It was an accident, but it was a limit.”'),
         S('“With virtual threads every reservation starts all five calls at once. Parked threads are almost free, so nothing pushes back.”'),
-        S('“The limit moved to the 20 connections. 829 reservations queued for them.”'),
-        S('“Sixteen protected the database and the provider. Nobody wrote it down.”',
-          more='Honest note: the old version would have been far worse at the big sale (p99 11.7 seconds). It failed slowly and visibly in its own queue.'),
+        S('“The limit moved to the 20 connections and the provider. 829 reservations in flight, waiting on one or the other.”'),
+        S('“Sixteen protected the database and the provider. Nobody wrote it down. And to be fair: sixteen threads would have been worse at this sale, p99 11.7 seconds. They failed slowly, in their own queue, where you could see it.”'),
     ]),
     ('storm', '@Retry was always there', 18.5, 'Show the retry storm.', [
         S('“The provider takes 20 at a time. It refused 4,939 charges.”'),
@@ -133,9 +132,8 @@ SLIDES = [
     ]),
     ('door', 'The same sale, with a door', 24, 'The door survives the big sale.', [
         S('“The same simulation, with the door.”'),
-        S('Plays three seconds, then freezes. “In flight climbs to 24 and stops. Everyone else is turned away at once, and nobody inside waits.”'),
-        S('“926 told to try again at once, never more than 24 inside.”',
-          tip='Honest note if asked: with the door alone, 50 payments still failed, because 24 is more than the provider’s 20. The budgets fix that.'),
+        S('Plays three seconds, then freezes. “In flight climbs to 24 and stops. Everyone else is turned away at once.”'),
+        S('“926 told to try again at once, never more than 24 inside. But 24 is more than the provider’s 20, so 50 payments still failed. That is the next fix.”'),
     ]),
     ('budgets-code', 'maxAsync is back, as a budget', 26, 'The same attribute, now a budget per dependency.', [
         S('“Behind the door, one executor per dependency.”'),

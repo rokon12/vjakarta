@@ -1470,7 +1470,7 @@ html.is-full #deck-fs .exit { display: inline; }
     <li><b>16</b><span>platform threads: at most 16 seat holds and payments at once<small>An accident, but a limit.</small></span></li>
     <li data-step="1"><b class="da" style="font-size:150px;padding-top:0">∞</b><span>virtual threads: every reservation starts all five at once<small>Parked threads are almost free, so nothing pushes back.</small></span></li>
   </ol>
-  <div class="cond" style="left:110px;top:600px" data-step="2"><span>20 connections</span><b>829 reservations in flight queue for them</b></div>
+  <div class="cond" style="left:110px;top:600px" data-step="2"><span>20 connections</span><b>829 in flight, waiting on them or on the provider</b></div>
   <p class="say sm" style="top:712px" data-step="3">The limit protected the database and the provider.<br>Nobody wrote it down.</p>
 </section>
 
@@ -1519,7 +1519,7 @@ html.is-full #deck-fs .exit { display: inline; }
 <!-- 21-budgets-code.html -->
 <section class="slide" id="budgets-code" data-layout="code" data-title="maxAsync is back, as a budget" data-section="The rebuild" data-section-key="rebuild" data-min="26">
 <h2 class="headline">maxAsync is back, as a budget</h2>
-  <div class="code" data-source="budgeted:src/main/java/ca/bazlur/tickets/TicketsApplication.java budgeted:src/main/java/ca/bazlur/tickets/Reservations.java"><div class="ln" data-step="1"><i>1</i>@ManagedExecutorDefinition(name = <span class="s">"…/seat-holds"</span>, …, <span class="hl" data-step="1">maxAsync = <span class="n">20</span></span>)</div><div class="ln" data-step="2"><i>2</i>@ManagedExecutorDefinition(name = <span class="s">"…/payments"</span>, …, <span class="hl" data-step="2">maxAsync = <span class="n">20</span></span>)</div><div class="ln"><i>3</i><span class="k">public</span> <span class="k">class</span> TicketsApplication <span class="k">extends</span> Application {</div><div class="ln"><i>4</i>…</div><div class="ln"><i>5</i>        .mapToObj(seat -&gt; seatHoldExecutor.runAsync(…));</div><div class="ln"><i>6</i><span class="k">var</span> payment = paymentExecutor.runAsync(…);</div></div>
+  <div class="code" style="font-size:32px" data-source="budgeted:src/main/java/ca/bazlur/tickets/TicketsApplication.java budgeted:src/main/java/ca/bazlur/tickets/Reservations.java"><div class="ln" data-step="1"><i>1</i>@ManagedExecutorDefinition(name = <span class="s">"…/seat-holds"</span>, virtual = true, <span class="hl" data-step="1">maxAsync = <span class="n">20</span></span>)</div><div class="ln" data-step="2"><i>2</i>@ManagedExecutorDefinition(name = <span class="s">"…/payments"</span>, virtual = true, <span class="hl" data-step="2">maxAsync = <span class="n">20</span></span>)</div><div class="ln"><i>3</i><span class="k">public</span> <span class="k">class</span> TicketsApplication <span class="k">extends</span> Application {</div><div class="ln"><i>4</i>…</div><div class="ln"><i>5</i>        .mapToObj(seat -&gt; seatHoldExecutor.runAsync(…));</div><div class="ln"><i>6</i><span class="k">var</span> payment = paymentExecutor.runAsync(…);</div></div>
   <div class="note" style="left:1150px;top:640px;--tilt:-2deg" data-step="1">seat holds:<br>the pool has 20</div>
   <div class="note" style="left:1500px;top:640px;--tilt:-2deg" data-step="2">payments:<br>provider takes 20</div>
   <div class="cond" style="left:110px;top:600px" data-step="3"><span>Same attribute</span><b>now it is a budget, not a thread count</b></div>
@@ -1763,7 +1763,7 @@ html.is-full #deck-fs .exit { display: inline; }
     "more": null
    },
    {
-    "say": "“Java 21 or later, and any Jakarta EE 11 server. I use Open Liberty today, but nothing here is Liberty-specific until I say so.”",
+    "say": "“Java 21 or later, and a Jakarta EE 11 server with Concurrency 3.1: Web Profile or the full platform. I use Open Liberty today, but nothing here is Liberty-specific until I say so.”",
     "tip": null,
     "run": null,
     "more": null
@@ -1896,7 +1896,7 @@ html.is-full #deck-fs .exit { display: inline; }
     "more": null
    },
    {
-    "say": "“The seat holds go through a pool of 20 database connections, about 10 ms each. The payment goes to a provider that takes 20 charges at a time, 50 ms each. Above 20 it says no: HTTP 429.”",
+    "say": "“The seat holds go through a pool of 20 database connections, about 10 ms each. The payment goes to a provider that takes 20 charges at a time, 50 ms each. Above 20 it says no: HTTP 429. Two things are simulated, and I want to say so: the 10 ms is a pg_sleep in the query, and the provider is a small fake that sleeps 50 ms. Everything else is real Liberty, real PostgreSQL and real k6.”",
     "tip": null,
     "run": null,
     "more": null
@@ -1949,8 +1949,8 @@ html.is-full #deck-fs .exit { display: inline; }
    },
    {
     "say": "“Same small sale.”",
-    "tip": "liberty:dev reloads in about a second. Then run ./run.sh load switched small.",
-    "run": "./run.sh state switched",
+    "tip": "First ./run.sh state switched; liberty:dev reloads in about a second. Fallback: results/switched-small-7.html.",
+    "run": "./run.sh load switched small",
     "more": null
    }
   ]
@@ -1959,7 +1959,7 @@ html.is-full #deck-fs .exit { display: inline; }
   "goal": "Virtual threads delivered.",
   "clicks": [
    {
-    "say": "Plays the platform-thread run. “Sixteen threads: p99 a second during the sale. The executor is the queue.”",
+    "say": "Plays the platform-thread run. “These charts are the recorded rehearsal runs, so your live numbers just now will be close, not identical. Sixteen threads: p99 a second during the sale. The executor is the queue.”",
     "tip": null,
     "run": null,
     "more": null
@@ -2010,7 +2010,7 @@ html.is-full #deck-fs .exit { display: inline; }
   "goal": "Make the invisible queue visible.",
   "clicks": [
    {
-    "say": "“The same sale as a picture. Traffic on the left, the reservations in flight in the middle, the 20 connections, the provider.”",
+    "say": "“The same sale as a picture. This is a simulation, calibrated to the recorded run: it reads 829 in flight at the same moment the real run did. Traffic on the left, the reservations in flight in the middle, the 20 connections, the provider.”",
     "tip": null,
     "run": null,
     "more": null
@@ -2051,16 +2051,16 @@ html.is-full #deck-fs .exit { display: inline; }
     "more": null
    },
    {
-    "say": "“The limit moved to the 20 connections. 829 reservations queued for them.”",
+    "say": "“The limit moved to the 20 connections and the provider. 829 reservations in flight, waiting on one or the other.”",
     "tip": null,
     "run": null,
     "more": null
    },
    {
-    "say": "“Sixteen protected the database and the provider. Nobody wrote it down.”",
+    "say": "“Sixteen protected the database and the provider. Nobody wrote it down. And to be fair: sixteen threads would have been worse at this sale, p99 11.7 seconds. They failed slowly, in their own queue, where you could see it.”",
     "tip": null,
     "run": null,
-    "more": "Honest note: the old version would have been far worse at the big sale (p99 11.7 seconds). It failed slowly and visibly in its own queue."
+    "more": null
    }
   ]
  },
@@ -2160,14 +2160,14 @@ html.is-full #deck-fs .exit { display: inline; }
     "more": null
    },
    {
-    "say": "Plays three seconds, then freezes. “In flight climbs to 24 and stops. Everyone else is turned away at once, and nobody inside waits.”",
+    "say": "Plays three seconds, then freezes. “In flight climbs to 24 and stops. Everyone else is turned away at once.”",
     "tip": null,
     "run": null,
     "more": null
    },
    {
-    "say": "“926 told to try again at once, never more than 24 inside.”",
-    "tip": "Honest note if asked: with the door alone, 50 payments still failed, because 24 is more than the provider’s 20. The budgets fix that.",
+    "say": "“926 told to try again at once, never more than 24 inside. But 24 is more than the provider’s 20, so 50 payments still failed. That is the next fix.”",
+    "tip": null,
     "run": null,
     "more": null
    }
@@ -3728,7 +3728,7 @@ Deck.scene('overload', (root, args, ctx) => {
   add('text', { class: 'lbl sm', x: 0, y: 30, text: 'TRAFFIC' });
   add('line', { class: 'rule', x1: 0, y1: 40, x2: 230, y2: 40 });
   const rate = add('text', { class: 'val', x: -4, y: 160, style: { 'font-size': '124px' } });
-  add('text', { class: 'sub', x: 0, y: 204, text: 'reservations / second' });
+  add('text', { class: 'sub', x: 0, y: 204, text: 'per second' });
   add('line', { class: 'wire', x1: 0, y1: floor + 2, x2: gate, y2: floor + 2 });
   const stream = Array.from({ length: 6 }, () => add('rect', { class: 'tok is-run', y: floor - 22, width: 18, height: 18 }));
 
@@ -4114,7 +4114,7 @@ Deck.scene('p99', (root, args, ctx) => {
   const firstRows = readouts(mode.first);
   const secondRows = readouts(mode.second);
   root.append(el('div', { class: 'readouts', style: { left: `${chart.x + chart.w + 70}px`, top: `${chart.y}px`, width: '610px' } }, [
-    el('p', { class: 'p99-speed', text: '30 s of each run, played at 3× speed' }), ...firstRows, ...secondRows,
+    el('p', { class: 'p99-speed', text: '30 s of each recorded run, at 3× speed' }), ...firstRows, ...secondRows,
   ]));
   const reveal = (rows, on) => rows.forEach(row => row.classList.toggle('p99-hidden', !on));
 
@@ -5584,7 +5584,7 @@ Deck.scene('titletrace', (root, args, ctx) => {
     add('path', { class: 'rule', d: `M${x1} ${y} v12 H${x2} v-12`, fill: 'none' });
     add('text', {
       class: 'plot-label', x: (x1 + x2) / 2, y: y + 56, 'text-anchor': 'middle', 'font-size': 38,
-      text: ['THE SWITCH', 'THE LAUNCH', 'THE REBUILD'][i],
+      text: 'SALE ' + (i + 1),
     });
   });
   root.append(svg);

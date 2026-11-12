@@ -374,7 +374,7 @@ code {
         <p class="slide-name">Turning them on is one line <span class="min">0:01</span></p>
         <p class="goal">Switching them on is trivial. The consequences are not in the diff.</p>
         <p><span class="kind">click 0</span>“In Jakarta EE 11, Jakarta Concurrency 3.1 lets a managed executor run on virtual threads. It is one attribute: virtual = true.”</p>
-        <p><span class="kind">click 1</span>“Java 21 or later, and any Jakarta EE 11 server. I use Open Liberty today, but nothing here is Liberty-specific until I say so.”</p>
+        <p><span class="kind">click 1</span>“Java 21 or later, and a Jakarta EE 11 server with Concurrency 3.1: Web Profile or the full platform. I use Open Liberty today, but nothing here is Liberty-specific until I say so.”</p>
         <p><span class="kind">click 2</span>“Nothing in this diff looks like a bug in code review. Keep that in mind.”</p>
       </div></li>
       <li class="cue" data-at="2"><span class="at">04</span><div class="what">
@@ -436,7 +436,7 @@ code {
         <p class="goal">Show the service and every limit in it, before anything breaks.</p>
         <p><span class="kind">click 0</span>“This is the service. One reservation holds four seats and charges one card, and it does all five at once on a managed executor.”</p>
         <p class="note">Start ./run.sh watch in the second terminal now if it is not running.</p>
-        <p><span class="kind">click 1</span>“The seat holds go through a pool of 20 database connections, about 10 ms each. The payment goes to a provider that takes 20 charges at a time, 50 ms each. Above 20 it says no: HTTP 429.”</p>
+        <p><span class="kind">click 1</span>“The seat holds go through a pool of 20 database connections, about 10 ms each. The payment goes to a provider that takes 20 charges at a time, 50 ms each. Above 20 it says no: HTTP 429. Two things are simulated, and I want to say so: the 10 ms is a pg_sleep in the query, and the provider is a small fake that sleeps 50 ms. Everything else is real Liberty, real PostgreSQL and real k6.”</p>
         <p><span class="kind">click 2</span>“The executor has sixteen platform threads. Somebody chose sixteen years ago.”</p>
         <p><span class="kind">click 3</span>“And the payment call has @Retry on it, the MicroProfile defaults. So far the provider has never said no, so it has never fired.”</p>
       </div></li>
@@ -464,13 +464,13 @@ code {
         <p><span class="kind">click 0</span>“So we do what everyone does. We switch to virtual threads.”</p>
         <p><span class="kind">click 1</span>“And we follow the advice: never pool virtual threads. So maxAsync = 16 goes, and virtual = true comes in.”</p>
         <p><span class="kind">click 2</span>“Same small sale.”</p>
-        <p><span class="kind run">Run</span><code class="cmd">./run.sh state switched</code></p>
-        <p class="note">liberty:dev reloads in about a second. Then run ./run.sh load switched small.</p>
+        <p><span class="kind run">Run</span><code class="cmd">./run.sh load switched small</code></p>
+        <p class="note">First ./run.sh state switched; liberty:dev reloads in about a second. Fallback: results/switched-small-7.html.</p>
       </div></li>
       <li class="cue" data-at="10.5"><span class="at">11</span><div class="what">
         <p class="slide-name">Same sale, virtual threads <span class="min">0:10</span></p>
         <p class="goal">Virtual threads delivered.</p>
-        <p><span class="kind">click 0</span>Plays the platform-thread run. “Sixteen threads: p99 a second during the sale. The executor is the queue.”</p>
+        <p><span class="kind">click 0</span>Plays the platform-thread run. “These charts are the recorded rehearsal runs, so your live numbers just now will be close, not identical. Sixteen threads: p99 a second during the sale. The executor is the queue.”</p>
         <p><span class="kind">click 1</span>Plays the virtual-thread run over it. “Virtual threads: 72 milliseconds. Same sale. Faster. This is the slide everyone shows.”</p>
       </div></li>
       <li class="cue" data-at="12"><span class="at">12</span><div class="what">
@@ -502,7 +502,7 @@ code {
       <li class="cue" data-at="15"><span class="at">14</span><div class="what">
         <p class="slide-name">Where the queue moved <span class="min">0:15</span></p>
         <p class="goal">Make the invisible queue visible.</p>
-        <p><span class="kind">click 0</span>“The same sale as a picture. Traffic on the left, the reservations in flight in the middle, the 20 connections, the provider.”</p>
+        <p><span class="kind">click 0</span>“The same sale as a picture. This is a simulation, calibrated to the recorded run: it reads 829 in flight at the same moment the real run did. Traffic on the left, the reservations in flight in the middle, the 20 connections, the provider.”</p>
         <p><span class="kind">click 1</span>Plays three seconds, then freezes. “700 a second. Nothing makes anyone wait at the door, so they all go straight to the pool and the provider. 829 in flight. The red ones have already missed half a second. The provider is full and refusing charges.”</p>
         <p><span class="kind">click 2</span>Plays on. “When the sale ends it drains in about three seconds.”</p>
         <p><span class="kind">click 3</span>“The totals: 939 payments failed, 4,000 retries, and 9,061 seat holds had to queue for a connection.”</p>
@@ -512,9 +512,8 @@ code {
         <p class="goal">Explain why this never happened before the switch.</p>
         <p><span class="kind">click 0</span>“Why didn’t this happen before? Sixteen platform threads meant at most sixteen seat holds and payments at once. Nobody designed that as protection. It was an accident, but it was a limit.”</p>
         <p><span class="kind">click 1</span>“With virtual threads every reservation starts all five calls at once. Parked threads are almost free, so nothing pushes back.”</p>
-        <p><span class="kind">click 2</span>“The limit moved to the 20 connections. 829 reservations queued for them.”</p>
-        <p><span class="kind">click 3</span>“Sixteen protected the database and the provider. Nobody wrote it down.”</p>
-        <p class="note"><b>Background.</b> Honest note: the old version would have been far worse at the big sale (p99 11.7 seconds). It failed slowly and visibly in its own queue.</p>
+        <p><span class="kind">click 2</span>“The limit moved to the 20 connections and the provider. 829 reservations in flight, waiting on one or the other.”</p>
+        <p><span class="kind">click 3</span>“Sixteen protected the database and the provider. Nobody wrote it down. And to be fair: sixteen threads would have been worse at this sale, p99 11.7 seconds. They failed slowly, in their own queue, where you could see it.”</p>
       </div></li>
       <li class="cue" data-at="18.5"><span class="at">16</span><div class="what">
         <p class="slide-name">@Retry was always there <span class="min">0:18</span></p>
@@ -557,9 +556,8 @@ code {
         <p class="slide-name">The same sale, with a door <span class="min">0:24</span></p>
         <p class="goal">The door survives the big sale.</p>
         <p><span class="kind">click 0</span>“The same simulation, with the door.”</p>
-        <p><span class="kind">click 1</span>Plays three seconds, then freezes. “In flight climbs to 24 and stops. Everyone else is turned away at once, and nobody inside waits.”</p>
-        <p><span class="kind">click 2</span>“926 told to try again at once, never more than 24 inside.”</p>
-        <p class="note">Honest note if asked: with the door alone, 50 payments still failed, because 24 is more than the provider’s 20. The budgets fix that.</p>
+        <p><span class="kind">click 1</span>Plays three seconds, then freezes. “In flight climbs to 24 and stops. Everyone else is turned away at once.”</p>
+        <p><span class="kind">click 2</span>“926 told to try again at once, never more than 24 inside. But 24 is more than the provider’s 20, so 50 payments still failed. That is the next fix.”</p>
       </div></li>
       <li class="cue" data-at="26"><span class="at">21</span><div class="what">
         <p class="slide-name">maxAsync is back, as a budget <span class="min">0:26</span></p>

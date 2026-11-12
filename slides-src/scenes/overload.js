@@ -168,7 +168,7 @@ Deck.scene('overload', (root, args, ctx) => {
   add('text', { class: 'lbl sm', x: 0, y: 30, text: 'TRAFFIC' });
   add('line', { class: 'rule', x1: 0, y1: 40, x2: 230, y2: 40 });
   const rate = add('text', { class: 'val', x: -4, y: 160, style: { 'font-size': '124px' } });
-  add('text', { class: 'sub', x: 0, y: 204, text: 'reservations / second' });
+  add('text', { class: 'sub', x: 0, y: 204, text: 'per second' });
   add('line', { class: 'wire', x1: 0, y1: floor + 2, x2: gate, y2: floor + 2 });
   const stream = Array.from({ length: 6 }, () => add('rect', { class: 'tok is-run', y: floor - 22, width: 18, height: 18 }));
 

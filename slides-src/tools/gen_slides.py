@@ -159,7 +159,7 @@ slide('15-why.html', 'why', 'rows', 'Sixteen threads were your limit', 'Where it
     <li><b>16</b><span>platform threads: at most 16 seat holds and payments at once<small>An accident, but a limit.</small></span></li>
     <li data-step="1"><b class="da" style="font-size:150px;padding-top:0">∞</b><span>virtual threads: every reservation starts all five at once<small>Parked threads are almost free, so nothing pushes back.</small></span></li>
   </ol>
-  <div class="cond" style="left:110px;top:600px" data-step="2"><span>20 connections</span><b>829 reservations in flight queue for them</b></div>
+  <div class="cond" style="left:110px;top:600px" data-step="2"><span>20 connections</span><b>829 in flight, waiting on them or on the provider</b></div>
   <p class="say sm" style="top:712px" data-step="3">The limit protected the database and the provider.<br>Nobody wrote it down.</p>
 ''')
 
@@ -212,13 +212,13 @@ slide('19-door-code.html', 'door-code', 'code', 'A door: at most 24 inside', 'Th
 slide('21-budgets-code.html', 'budgets-code', 'code', 'maxAsync is back, as a budget', 'The rebuild', 'rebuild', 26, f'''
   <h2 class="headline">maxAsync is back, as a budget</h2>
   {code([
-      ('@ManagedExecutorDefinition(name = "…/seat-holds", …, maxAsync = 20)', {'hl': 'maxAsync = 20', 'hlstep': 1, 'step': 1}),
-      ('@ManagedExecutorDefinition(name = "…/payments", …, maxAsync = 20)', {'hl': 'maxAsync = 20', 'hlstep': 2, 'step': 2}),
+      ('@ManagedExecutorDefinition(name = "…/seat-holds", virtual = true, maxAsync = 20)', {'hl': 'maxAsync = 20', 'hlstep': 1, 'step': 1}),
+      ('@ManagedExecutorDefinition(name = "…/payments", virtual = true, maxAsync = 20)', {'hl': 'maxAsync = 20', 'hlstep': 2, 'step': 2}),
       'public class TicketsApplication extends Application {',
       '…',
       '        .mapToObj(seat -> seatHoldExecutor.runAsync(…));',
       'var payment = paymentExecutor.runAsync(…);',
-  ], source=at(('budgeted', 'TicketsApplication.java'), ('budgeted', 'Reservations.java')))}
+  ], style='font-size:32px', source=at(('budgeted', 'TicketsApplication.java'), ('budgeted', 'Reservations.java')))}
   <div class="note" style="left:1150px;top:640px;--tilt:-2deg" data-step="1">seat holds:<br>the pool has 20</div>
   <div class="note" style="left:1500px;top:640px;--tilt:-2deg" data-step="2">payments:<br>provider takes 20</div>
   <div class="cond" style="left:110px;top:600px" data-step="3"><span>Same attribute</span><b>now it is a budget, not a thread count</b></div>

@@ -63,7 +63,7 @@ Deck.scene('titletrace', (root, args, ctx) => {
     add('path', { class: 'rule', d: `M${x1} ${y} v12 H${x2} v-12`, fill: 'none' });
     add('text', {
       class: 'plot-label', x: (x1 + x2) / 2, y: y + 56, 'text-anchor': 'middle', 'font-size': 38,
-      text: ['THE SWITCH', 'THE LAUNCH', 'THE REBUILD'][i],
+      text: 'SALE ' + (i + 1),
     });
   });
   root.append(svg);

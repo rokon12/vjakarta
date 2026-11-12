@@ -43,7 +43,7 @@
     "more": null
    },
    {
-    "say": "“Java 21 or later, and any Jakarta EE 11 server. I use Open Liberty today, but nothing here is Liberty-specific until I say so.”",
+    "say": "“Java 21 or later, and a Jakarta EE 11 server with Concurrency 3.1: Web Profile or the full platform. I use Open Liberty today, but nothing here is Liberty-specific until I say so.”",
     "tip": null,
     "run": null,
     "more": null
@@ -176,7 +176,7 @@
     "more": null
    },
    {
-    "say": "“The seat holds go through a pool of 20 database connections, about 10 ms each. The payment goes to a provider that takes 20 charges at a time, 50 ms each. Above 20 it says no: HTTP 429.”",
+    "say": "“The seat holds go through a pool of 20 database connections, about 10 ms each. The payment goes to a provider that takes 20 charges at a time, 50 ms each. Above 20 it says no: HTTP 429. Two things are simulated, and I want to say so: the 10 ms is a pg_sleep in the query, and the provider is a small fake that sleeps 50 ms. Everything else is real Liberty, real PostgreSQL and real k6.”",
     "tip": null,
     "run": null,
     "more": null
@@ -229,8 +229,8 @@
    },
    {
     "say": "“Same small sale.”",
-    "tip": "liberty:dev reloads in about a second. Then run ./run.sh load switched small.",
-    "run": "./run.sh state switched",
+    "tip": "First ./run.sh state switched; liberty:dev reloads in about a second. Fallback: results/switched-small-7.html.",
+    "run": "./run.sh load switched small",
     "more": null
    }
   ]
@@ -239,7 +239,7 @@
   "goal": "Virtual threads delivered.",
   "clicks": [
    {
-    "say": "Plays the platform-thread run. “Sixteen threads: p99 a second during the sale. The executor is the queue.”",
+    "say": "Plays the platform-thread run. “These charts are the recorded rehearsal runs, so your live numbers just now will be close, not identical. Sixteen threads: p99 a second during the sale. The executor is the queue.”",
     "tip": null,
     "run": null,
     "more": null
@@ -290,7 +290,7 @@
   "goal": "Make the invisible queue visible.",
   "clicks": [
    {
-    "say": "“The same sale as a picture. Traffic on the left, the reservations in flight in the middle, the 20 connections, the provider.”",
+    "say": "“The same sale as a picture. This is a simulation, calibrated to the recorded run: it reads 829 in flight at the same moment the real run did. Traffic on the left, the reservations in flight in the middle, the 20 connections, the provider.”",
     "tip": null,
     "run": null,
     "more": null
@@ -331,16 +331,16 @@
     "more": null
    },
    {
-    "say": "“The limit moved to the 20 connections. 829 reservations queued for them.”",
+    "say": "“The limit moved to the 20 connections and the provider. 829 reservations in flight, waiting on one or the other.”",
     "tip": null,
     "run": null,
     "more": null
    },
    {
-    "say": "“Sixteen protected the database and the provider. Nobody wrote it down.”",
+    "say": "“Sixteen protected the database and the provider. Nobody wrote it down. And to be fair: sixteen threads would have been worse at this sale, p99 11.7 seconds. They failed slowly, in their own queue, where you could see it.”",
     "tip": null,
     "run": null,
-    "more": "Honest note: the old version would have been far worse at the big sale (p99 11.7 seconds). It failed slowly and visibly in its own queue."
+    "more": null
    }
   ]
  },
@@ -440,14 +440,14 @@
     "more": null
    },
    {
-    "say": "Plays three seconds, then freezes. “In flight climbs to 24 and stops. Everyone else is turned away at once, and nobody inside waits.”",
+    "say": "Plays three seconds, then freezes. “In flight climbs to 24 and stops. Everyone else is turned away at once.”",
     "tip": null,
     "run": null,
     "more": null
    },
    {
-    "say": "“926 told to try again at once, never more than 24 inside.”",
-    "tip": "Honest note if asked: with the door alone, 50 payments still failed, because 24 is more than the provider’s 20. The budgets fix that.",
+    "say": "“926 told to try again at once, never more than 24 inside. But 24 is more than the provider’s 20, so 50 payments still failed. That is the next fix.”",
+    "tip": null,
     "run": null,
     "more": null
    }
