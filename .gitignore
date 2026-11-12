@@ -3,3 +3,7 @@ results/
 .idea/
 *.iml
 .DS_Store
+.superpowers/
+slides.html
+slides-src/dist/
+slides-src/tmp/

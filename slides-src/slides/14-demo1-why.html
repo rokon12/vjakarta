@@ -1,0 +1,9 @@
+<section class="slide" id="demo1-why" data-layout="rows" data-title="The pool was your limit" data-section="Demo 1" data-section-key="demo1" data-min="16">
+<h2 class="headline">The pool was your limit</h2>
+  <ol class="rows tight" style="top:226px">
+    <li><b>200</b><span>platform threads: at most 200 requests inside<small>An accident, but a limit.</small></span></li>
+    <li data-step="1"><b class="da" style="font-size:150px;padding-top:0">∞</b><span>virtual threads: every request gets in and parks on the pool<small>Parked threads are almost free, so nothing pushes back.</small></span></li>
+  </ol>
+  <div class="cond" style="left:110px;top:560px" data-step="2"><span>HikariCP</span><b>a request waits up to 30 s for a free connection</b></div>
+  <p class="say sm" style="top:672px" data-step="3">A semaphore limits how many run.<br>It does not limit how many <em>wait</em>.</p>
+</section>

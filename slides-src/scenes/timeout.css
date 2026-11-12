@@ -1,0 +1,57 @@
+.timeout-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* an ink plate with white capitals, like the LIMIT flag on the title chart */
+.timeout-flag { fill: var(--ink); }
+
+.timeout-flag-text {
+  font-family: var(--dc);
+  font-weight: 700;
+  font-size: 34px;
+  letter-spacing: 0.1em;
+  fill: var(--white);
+}
+
+/* log lines: the timestamp on a plate, the text as the demo printed it */
+.timeout-log {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 32px;
+}
+
+.timeout-log.is-big { font-size: 40px; font-weight: 800; }
+.timeout-log.is-inverse { fill: var(--white); }
+
+.timeout-plate { fill: var(--plate); }
+.timeout-plate.is-alarm { fill: var(--red); }
+.timeout-plate.is-good { fill: var(--green); }
+.timeout-backing { fill: var(--white); }
+
+.timeout-stem { fill: none; stroke: var(--ink); stroke-width: 3; }
+.timeout-dot { fill: var(--ink); }
+
+.timeout-on-solid { fill: var(--white); }
+.timeout-quiet { fill: var(--ink-2); }
+
+/* last run's leak, kept as an outline so the room sees what the fix saved */
+.timeout-ghost { opacity: 0.13; }
+.timeout-ghost-edge { fill: none; stroke: var(--red); stroke-width: 3; stroke-dasharray: 10 8; }
+
+.timeout-faint { opacity: 0.4; }
+
+/* red pen: the order the log lines were printed in */
+.timeout-badge { fill: var(--white); stroke: var(--red); stroke-width: 5; }
+
+.timeout-badge-num {
+  font-family: var(--hand);
+  font-weight: 700;
+  font-size: 42px;
+  text-anchor: middle;
+  fill: var(--red);
+}

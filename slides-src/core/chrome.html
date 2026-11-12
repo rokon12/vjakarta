@@ -1,0 +1,35 @@
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="4" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="12" markerHeight="12" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L12 6 L0 12 Z" fill="#0e1b2c"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="12" markerHeight="12" orient="auto-start-reverse" markerUnits="userSpaceOnUse">
+      <path d="M0 0 L12 6 L0 12 Z" fill="#d31f2b"/>
+    </marker>
+    <pattern id="hatch-wait" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="10" height="10" fill="#fbfdfd"/><rect width="3.5" height="10" fill="#0a3fb8"/>
+    </pattern>
+    <pattern id="hatch-late" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="10" height="10" fill="#fbfdfd"/><rect width="3.5" height="10" fill="#d31f2b"/>
+    </pattern>
+  </defs>
+</svg>
+<div id="feed"></div>
+<div id="chrome">
+  <div class="plate" data-chrome="section"></div>
+  <svg class="ruler" viewBox="0 0 1920 80"><line x1="520" y1="24" x2="1600" y2="24" stroke="#0e1b2c" stroke-width="3"/><line x1="520" y1="24" x2="520" y2="40" stroke="#0e1b2c" stroke-width="3"/><text x="520" y="72" text-anchor="middle">0</text><line x1="538" y1="24" x2="538" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="556" y1="24" x2="556" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="574" y1="24" x2="574" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="592" y1="24" x2="592" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="610" y1="24" x2="610" y2="35" stroke="#0e1b2c" stroke-width="2"/><line x1="628" y1="24" x2="628" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="646" y1="24" x2="646" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="664" y1="24" x2="664" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="682" y1="24" x2="682" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="700" y1="24" x2="700" y2="40" stroke="#0e1b2c" stroke-width="3"/><text x="700" y="72" text-anchor="middle">10</text><line x1="718" y1="24" x2="718" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="736" y1="24" x2="736" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="754" y1="24" x2="754" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="772" y1="24" x2="772" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="790" y1="24" x2="790" y2="35" stroke="#0e1b2c" stroke-width="2"/><line x1="808" y1="24" x2="808" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="826" y1="24" x2="826" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="844" y1="24" x2="844" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="862" y1="24" x2="862" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="880" y1="24" x2="880" y2="40" stroke="#0e1b2c" stroke-width="3"/><text x="880" y="72" text-anchor="middle">20</text><line x1="898" y1="24" x2="898" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="916" y1="24" x2="916" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="934" y1="24" x2="934" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="952" y1="24" x2="952" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="970" y1="24" x2="970" y2="35" stroke="#0e1b2c" stroke-width="2"/><line x1="988" y1="24" x2="988" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1006" y1="24" x2="1006" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1024" y1="24" x2="1024" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1042" y1="24" x2="1042" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1060" y1="24" x2="1060" y2="40" stroke="#0e1b2c" stroke-width="3"/><text x="1060" y="72" text-anchor="middle">30</text><line x1="1078" y1="24" x2="1078" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1096" y1="24" x2="1096" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1114" y1="24" x2="1114" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1132" y1="24" x2="1132" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1150" y1="24" x2="1150" y2="35" stroke="#0e1b2c" stroke-width="2"/><line x1="1168" y1="24" x2="1168" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1186" y1="24" x2="1186" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1204" y1="24" x2="1204" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1222" y1="24" x2="1222" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1240" y1="24" x2="1240" y2="40" stroke="#0e1b2c" stroke-width="3"/><text x="1240" y="72" text-anchor="middle">40</text><line x1="1258" y1="24" x2="1258" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1276" y1="24" x2="1276" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1294" y1="24" x2="1294" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1312" y1="24" x2="1312" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1330" y1="24" x2="1330" y2="35" stroke="#0e1b2c" stroke-width="2"/><line x1="1348" y1="24" x2="1348" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1366" y1="24" x2="1366" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1384" y1="24" x2="1384" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1402" y1="24" x2="1402" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1420" y1="24" x2="1420" y2="40" stroke="#0e1b2c" stroke-width="3"/><text x="1420" y="72" text-anchor="middle">50</text><line x1="1438" y1="24" x2="1438" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1456" y1="24" x2="1456" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1474" y1="24" x2="1474" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1492" y1="24" x2="1492" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1510" y1="24" x2="1510" y2="35" stroke="#0e1b2c" stroke-width="2"/><line x1="1528" y1="24" x2="1528" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1546" y1="24" x2="1546" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1564" y1="24" x2="1564" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1582" y1="24" x2="1582" y2="30" stroke="#0e1b2c" stroke-width="2"/><line x1="1600" y1="24" x2="1600" y2="40" stroke="#0e1b2c" stroke-width="3"/><text x="1600" y="72" text-anchor="middle">60</text><text x="1634" y="72">min</text></svg>
+  <div class="done"></div>
+  <div class="here"></div>
+  <div class="clock"><span data-chrome="clock">00:00</span></div>
+  <div class="count"><span data-chrome="index">01</span><span class="of">/<span data-chrome="total">38</span></span></div>
+  <div id="deck-fs" data-interactive title="Full screen (F)">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path class="enter" d="M5 9.5V5h4.5M14.5 5H19v4.5M19 14.5V19h-4.5M9.5 19H5v-4.5"/>
+      <path class="exit" d="M9.5 5v4.5H5M14.5 5v4.5H19M19 14.5h-4.5V19M5 14.5h4.5V19"/>
+    </svg>
+  </div>
+</div>

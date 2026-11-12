@@ -1,0 +1,14 @@
+<section class="slide" id="demo1-fix" data-layout="code" data-title="The fix: say no at the door" data-section="Demo 1" data-section-key="demo1" data-min="19" data-steps="4">
+<h2 class="headline">The fix: say no at the door</h2>
+  <div class="code"><div class="ln" data-step="1"><i>1</i><span class="hl" data-step="1"><span class="k">private</span> <span class="k">final</span> Semaphore admission = <span class="k">new</span> Semaphore(<span class="n">32</span>);</span></div><div class="ln"><i>2</i></div><div class="ln"><i>3</i><span class="k">private</span> <span class="k">void</span> handle() {</div><div class="ln" data-step="2"><i>4</i>    <span class="hl" data-step="2"><span class="k">if</span> (!admission.tryAcquire()) {</span></div><div class="ln" data-step="2"><i>5</i>        <span class="hl" data-step="2">rejected.incrementAndGet();</span></div><div class="ln" data-step="2"><i>6</i>        <span class="hl" data-step="2"><span class="k">return</span>;</span></div><div class="ln" data-step="2"><i>7</i>    <span class="hl" data-step="2">}</span></div><div class="ln"><i>8</i>    <span class="k">try</span> {</div><div class="ln"><i>9</i>        reserve();</div><div class="ln"><i>10</i>    } <span class="k">finally</span> {</div><div class="ln" data-step="3"><i>11</i>        <span class="hl" data-step="3">admission.release();</span></div><div class="ln"><i>12</i>    }</div><div class="ln"><i>13</i>}</div></div>
+  <svg class="pen">
+    <g data-step="1"><g filter="url(#rough)"><path d="M1406 264 H1450"/><circle cx="1484" cy="264" r="30"/></g><text x="1484" y="279">1</text></g>
+    <g data-step="2"><g filter="url(#rough)"><path d="M1010 410 h18 v206 h-18 M1028 513 H1070"/><circle cx="1104" cy="513" r="30"/></g><text x="1104" y="528">2</text></g>
+    <g data-step="3"><g filter="url(#rough)"><path d="M854 824 H900"/><circle cx="934" cy="824" r="30"/></g><text x="934" y="839">3</text></g>
+  </svg>
+  <div class="note" style="left:1530px;top:240px;--tilt:-2deg" data-step="1">32 inside,<br>no more</div>
+  <div class="note" style="left:1150px;top:466px;--tilt:-2deg" data-step="2">no permit?<br>turn it away, fast</div>
+  <div class="note" style="left:980px;top:776px;--tilt:-2deg" data-step="3">always<br>hand it back</div>
+  <div class="cond" style="left:760px;top:632px" data-step="4"><span>Why 32</span><b>8 running + 24 waiting ≈ 330 ms</b></div>
+  <div class="cue" data-step="4"><div class="h">Next · terminal</div><div class="c">$ ./run.sh bounded<span class="cur"></span></div></div>
+</section>

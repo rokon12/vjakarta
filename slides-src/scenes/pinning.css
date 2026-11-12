@@ -1,0 +1,33 @@
+.pinning-run {
+  position: absolute;
+  left: 0;
+}
+
+.pinning-run svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+}
+
+.pinning-red { fill: var(--red); }
+
+.pinning-plates {
+  position: absolute;
+  top: 0;
+  display: flex;
+  gap: 16px;
+}
+
+.pinning-plate { position: relative; }
+
+.pinning-clock {
+  right: 0;
+  top: 0;
+}
+
+.pinning-clock-label { margin-right: 22px; }
+
+.pinning-clock .pinning-clock-comma { width: 34px; }
+
+.pinning-clock .pinning-clock-unit { width: auto; }

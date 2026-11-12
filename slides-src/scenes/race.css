@@ -1,0 +1,47 @@
+/* race: two lanes of 1,000 requests, a clock each, and the last request on one time axis */
+
+.race-art,
+.compare-art {
+  position: absolute;
+  left: 0;
+  top: 0;
+  overflow: visible;
+}
+
+.race-cell { stroke-width: 2.5; }
+
+.race-tag {
+  display: inline-block;
+  margin-right: 18px;
+  padding: 13px 15px 1px;
+  background: var(--plate);
+  color: var(--white);
+}
+
+.race-hint {
+  margin-left: 28px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.ro .race-ms { width: 84px; }
+.ro .win .race-comma { font-size: 40px; }
+
+.race-keys {
+  position: absolute;
+  left: 0;
+  display: flex;
+  gap: 56px;
+}
+
+.race-tag-box { fill: var(--plate); }
+.race-tag-text { fill: var(--white); }
+.race-tip { fill: var(--blue); }
+
+/* compare: two bars to one scale, and what the 732 late answers turned into */
+
+.compare-gap { fill: var(--paper); }
+.compare-on-fill { fill: var(--white); }
+.compare-figure { font-size: 88px; }
+.compare-figure.is-ok { fill: var(--green); }
+.compare-figure.is-off { fill: var(--ink-2); }

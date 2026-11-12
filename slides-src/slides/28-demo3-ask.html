@@ -1,0 +1,6 @@
+<section class="slide" id="demo3-ask" data-layout="code" data-title="We wait 200 ms" data-section="Demo 3" data-section-key="demo3" data-min="40">
+<h2 class="headline">We won’t make them wait</h2>
+  <div class="code"><div class="ln"><i>1</i>Future&lt;String&gt; reservation = executor.submit(<span class="k">this</span>::reserve);</div><div class="ln"><i>2</i><span class="k">try</span> {</div><div class="ln"><i>3</i>    log(reservation.<span class="hl">get(<span class="n">200</span>, MILLISECONDS)</span>);</div><div class="ln"><i>4</i>} <span class="k">catch</span> (TimeoutException e) {</div><div class="ln"><i>5</i>    log(<span class="s">"timed out, customer told to try again"</span>);</div><div class="ln"><i>6</i>}</div></div>
+  <p class="say md" style="top:652px" data-step="1"><em>What happens to the payment?</em></p>
+  <div class="cue" data-step="1"><div class="h">Next · terminal</div><div class="c">$ ./run.sh leak<span class="cur"></span></div></div>
+</section>

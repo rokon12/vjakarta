@@ -1,0 +1,9 @@
+<section class="slide" id="demo3-fix" data-layout="code" data-title="The fix: cancel the work" data-section="Demo 3" data-section-key="demo3" data-min="45">
+<h2 class="headline">The fix: cancel the work</h2>
+  <div class="code"><div class="ln"><i>1</i><span class="k">try</span> {</div><div class="ln"><i>2</i>    log(reservation.get(<span class="n">200</span>, MILLISECONDS));</div><div class="ln"><i>3</i>} <span class="k">catch</span> (TimeoutException e) {</div><div class="ln"><i>4</i>    log(<span class="s">"timed out, customer told to try again"</span>);</div><div class="ln" data-step="1"><i>5</i>    <span class="hl" data-step="1">reservation.cancel(true);</span></div><div class="ln"><i>6</i>}</div></div>
+  <svg class="pen"><g data-step="1"><g filter="url(#rough)"><path d="M874 488 H916"/><circle cx="950" cy="488" r="30"/></g><text x="950" y="503">1</text></g></svg>
+  <div class="note" style="left:998px;top:462px;--tilt:-2deg" data-step="1">one line: interrupt the task</div>
+  <div class="cond" style="left:110px;top:640px" data-step="2"><span>Works when</span><b>the task is blocked: a sleep, a socket read, a lock wait</b></div>
+  <div class="cond" style="left:110px;top:736px" data-step="2"><span>Fails when</span><b>the task swallows the interrupt, or never blocks</b></div>
+  <div class="cue" data-step="2"><div class="h">Next · terminal</div><div class="c">$ ./run.sh cancel<span class="cur"></span></div></div>
+</section>
