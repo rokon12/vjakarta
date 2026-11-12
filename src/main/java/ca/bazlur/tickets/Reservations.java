@@ -19,8 +19,11 @@ public class Reservations {
 
     private static final Logger log = Logger.getLogger(Reservations.class.getName());
 
-    @Resource(lookup = "java:app/concurrent/reservations")
-    ManagedExecutorService executor;
+    @Resource(lookup = "java:app/concurrent/seat-holds")
+    ManagedExecutorService seatHoldExecutor;
+
+    @Resource(lookup = "java:app/concurrent/payments")
+    ManagedExecutorService paymentExecutor;
 
     @Inject
     SeatHolds seatHolds;
@@ -31,14 +34,14 @@ public class Reservations {
     public CompletionStage<Reservation> reserve(ReservationRequest request) {
         var id = UUID.randomUUID();
         var holds = IntStream.range(0, request.seats())
-                .mapToObj(seat -> executor.runAsync(() -> seatHolds.hold(id, request.show(), seat)));
-        var payment = executor.runAsync(() -> payments.charge(id, request.seats() * 4_500));
+                .mapToObj(seat -> seatHoldExecutor.runAsync(() -> seatHolds.hold(id, request.show(), seat)));
+        var payment = paymentExecutor.runAsync(() -> payments.charge(id, request.seats() * 4_500));
 
         var parts = Stream.concat(holds, Stream.of(payment)).toArray(CompletableFuture[]::new);
         return CompletableFuture.allOf(parts).thenApply(done -> new Reservation(id, request.seats()));
     }
 
     void report(@Observes Startup startup) {
-        executor.execute(() -> log.info("reservation tasks run on virtual threads: " + Thread.currentThread().isVirtual()));
+        seatHoldExecutor.execute(() -> log.info("reservation tasks run on virtual threads: " + Thread.currentThread().isVirtual()));
     }
 }
