@@ -6,13 +6,17 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.enterprise.event.Startup;
 import jakarta.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 @ApplicationScoped
 public class Reservations {
@@ -31,14 +35,36 @@ public class Reservations {
     @Inject
     Payments payments;
 
+    @Inject
+    @ConfigProperty(name = "reservation.deadline.millis", defaultValue = "500")
+    long deadlineMillis;
+
     public CompletionStage<Reservation> reserve(ReservationRequest request) {
         var id = UUID.randomUUID();
+        var started = System.nanoTime();
         var holds = IntStream.range(0, request.seats())
                 .mapToObj(seat -> seatHoldExecutor.runAsync(() -> seatHolds.hold(id, request.show(), seat)));
-        var payment = paymentExecutor.runAsync(() -> payments.charge(id, request.seats() * 4_500));
+        var payment = paymentExecutor.runAsync(() -> pay(id, request.seats(), started));
 
         var parts = Stream.concat(holds, Stream.of(payment)).toArray(CompletableFuture[]::new);
-        return CompletableFuture.allOf(parts).thenApply(done -> new Reservation(id, request.seats()));
+        return CompletableFuture.allOf(parts)
+                .orTimeout(deadlineMillis, MILLISECONDS)
+                .whenComplete((done, failure) -> {
+                    if (failure instanceof TimeoutException) {
+                        trace(started, "timed out, customer told to try again");
+                    }
+                })
+                .thenApply(done -> new Reservation(id, request.seats()));
+    }
+
+    private void pay(UUID id, int seats, long started) {
+        trace(started, "charging card");
+        payments.charge(id, seats * 4_500);
+        trace(started, "card charged");
+    }
+
+    private void trace(long started, String event) {
+        log.fine(() -> "%5d ms  %s".formatted((System.nanoTime() - started) / 1_000_000, event));
     }
 
     void report(@Observes Startup startup) {
