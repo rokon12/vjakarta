@@ -74,3 +74,21 @@ Built in two commits, measured at both sales after each.
 At the big sale, compared with `switched`: about 2,730 on time instead of about 1,650, no late answers instead of about 1,130, no failed payments instead of about 920, and about 980 people told "try again" at once. Per second (run 1) p99 stays at 85–91 ms during the sale and is back to 58 ms the second it ends.
 
 Not added, because they would change nothing at this load once the budgets were in: a per-request fan-out limit, `@Bulkhead`, a gentler retry policy.
+
+## `deadlines`: what cancelling does here
+
+Leak version (committed), provider at 1,800 ms a charge, one request:
+
+    1 ms  charging card
+  507 ms  timed out, customer told to try again     (the customer got 504 after 0.52 s)
+ 1850 ms  card charged
+
+Probe (not committed): the same plus `part.cancel(true)` on every part at the deadline.
+
+    0 ms  charging card
+  504 ms  timed out, customer told to try again
+  510 ms  the payment call fails: ProcessingException ... SocketException: Closed by interrupt
+
+So on Liberty, `cancel(true)` on a managed `CompletableFuture` does interrupt the running task (a plain JDK `CompletableFuture` does not; this is Liberty's behaviour, not the spec's). The virtual thread blocked on the socket is woken and the socket is closed.
+
+But the provider's own log says `1 charged`: it had the request and finished the charge anyway. Cancelling stops our work and frees our connection and executor slot; it does not un-send a request to another service. In vfun the payment was local, so cancelling saved the card. Here the customer is told to try again and has already been charged; a retry charges again unless the provider deduplicates (an idempotency key) or is told the deadline.
