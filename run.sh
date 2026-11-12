@@ -36,7 +36,7 @@ load() {
 }
 
 state() {
-  run git checkout -q "${1:?which state: before, switched, budgeted, deadlines or main}"
+  run git restore --source="${1:?which state: before, switched, budgeted, deadlines or main}" src provider db
   grep -h "@ManagedExecutorDefinition" src/main/java/ca/bazlur/tickets/TicketsApplication.java
 }
 
