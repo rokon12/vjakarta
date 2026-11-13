@@ -8,7 +8,7 @@ const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 export const sleep = ms => new Promise(done => setTimeout(done, ms));
 
 // port 0 lets Chrome pick a free port and tell us through DevToolsActivePort
-export async function browser(port = 0, { width = 1920, height = 1080 } = {}) {
+export async function browser(port = 0, { width = 1920, height = 1080, mobile = false, touch = false } = {}) {
   const profile = mkdtempSync(join(tmpdir(), 'deck-live-'));
   const chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--force-device-scale-factor=1',
     `--window-size=${width},${height}`, `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, 'about:blank'], { stdio: 'ignore' });
@@ -44,7 +44,8 @@ export async function browser(port = 0, { width = 1920, height = 1080 } = {}) {
   });
   await send('Runtime.enable');
   await send('Page.enable');
-  await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
+  await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile });
+  if (touch) await send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 5 });
   const evaluate = async expression =>
     (await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true })).result?.value;
   return {

@@ -133,3 +133,24 @@ html:not(.is-ready) .slide { transition: none; }
   color: var(--overlay-ground-solid, #0a0c10);
   font: 600 clamp(14px, 1.4vw, 22px)/1 var(--font-mono, "JetBrains Mono", Menlo, monospace);
 }
+
+/* ---------- phones ---------- */
+
+@media (pointer: coarse) {
+  #viewport { touch-action: manipulation; }
+  #deck-fs { display: none; }
+}
+
+@media (pointer: coarse) and (orientation: portrait) {
+  body::after {
+    content: "Turn your phone sideways for a bigger slide · swipe to move";
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    top: calc(50% + 28.125vw + 20px);
+    font: 600 16px/1.4 var(--font-ui, sans-serif);
+    color: var(--overlay-ink, #f2f2f2);
+    text-align: center;
+    pointer-events: none;
+  }
+}

@@ -6,14 +6,25 @@
 //   node tools/style_probe.mjs <deck.html> colors                every color painted in any state
 //   node tools/style_probe.mjs <deck.html> contrast              text below 3:1 (24 px and up) or 4.5:1
 //   node tools/style_probe.mjs <deck.html> fonts                 document.fonts after they settle
+//   node tools/style_probe.mjs <deck.html> page                  sizes, the slide, the phone hint
+//   node tools/style_probe.mjs <deck.html> swipe <state> left|right
+// Any mode takes --device desktop|phone-upright|phone-sideways (default desktop).
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { openDeck } from './cdp.mjs';
+import { openDeck, sleep } from './cdp.mjs';
 
-const [file, mode, arg] = process.argv.slice(2);
-const MODES = ['states', 'styles', 'colors', 'contrast', 'fonts'];
-if (!file || !MODES.includes(mode) || (mode === 'styles' && !arg)) {
-  console.error(`usage: node tools/style_probe.mjs <deck.html> ${MODES.join('|')} [spec.json]`);
+const DEVICES = {
+  desktop: { width: 1920, height: 1080 },
+  'phone-upright': { width: 390, height: 844, mobile: true, touch: true },
+  'phone-sideways': { width: 844, height: 390, mobile: true, touch: true },
+};
+const args = process.argv.slice(2);
+const at = args.indexOf('--device');
+const device = at >= 0 ? args.splice(at, 2)[1] : 'desktop';
+const [file, mode, arg, arg2] = args;
+const MODES = ['states', 'styles', 'colors', 'contrast', 'fonts', 'page', 'swipe'];
+if (!file || !MODES.includes(mode) || (['styles', 'swipe'].includes(mode) && !arg) || !DEVICES[device]) {
+  console.error(`usage: node tools/style_probe.mjs <deck.html> ${MODES.join('|')} [arg] [--device ${Object.keys(DEVICES).join('|')}]`);
   process.exit(64);
 }
 
@@ -179,10 +190,35 @@ const PAGE = String.raw`window.__probe = (() => {
     return [...document.fonts].map(f => ({ family: f.family.replace(/^"|"$/g, ''), status: f.status }));
   }
 
-  return { states, go, styles, colors, contrast, fonts };
+  function page() {
+    const box = el => {
+      const b = el.getBoundingClientRect();
+      return { top: b.top, bottom: b.bottom, left: b.left, right: b.right, width: b.width, height: b.height };
+    };
+    const hint = getComputedStyle(document.body, '::after');
+    const drawn = !['none', 'normal'].includes(hint.content);
+    const top = parseFloat(hint.top);
+    const height = parseFloat(hint.height);
+    return {
+      scrollWidth: document.scrollingElement.scrollWidth,
+      innerWidth,
+      innerHeight,
+      stage: box(document.getElementById('stage')),
+      background: getComputedStyle(document.body).backgroundColor,
+      hint: {
+        content: hint.content,
+        display: drawn ? hint.display : 'none',
+        color: hint.color,
+        fontSize: hint.fontSize,
+        rect: { top, height, bottom: top + height, left: parseFloat(hint.left), width: parseFloat(hint.width) },
+      },
+    };
+  }
+
+  return { states, go, styles, colors, contrast, fonts, page };
 })();`;
 
-const deck = await openDeck('file://' + resolve(file) + '?still');
+const deck = await openDeck('file://' + resolve(file) + '?still', DEVICES[device]);
 await deck.evaluate(PAGE);
 const call = (fn, ...args) => deck.evaluate(`__probe.${fn}(${args.map(a => JSON.stringify(a ?? null)).join(', ')})`);
 
@@ -191,6 +227,17 @@ if (mode === 'states') {
   result = await call('states');
 } else if (mode === 'fonts') {
   result = { families: await call('fonts') };
+} else if (mode === 'page') {
+  result = await call('page');
+} else if (mode === 'swipe') {
+  await call('go', arg);
+  const { w, h } = await deck.evaluate('({ w: innerWidth, h: innerHeight })');
+  const [from, to] = arg2 === 'right' ? [0.25, 0.75] : [0.75, 0.25];
+  await deck.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: w * from, y: h / 2 }] });
+  await deck.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: w * to, y: h / 2 }] });
+  await deck.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await sleep(400);
+  result = { hash: await deck.evaluate('location.hash') };
 } else if (mode === 'styles') {
   result = [];
   for (const item of JSON.parse(readFileSync(arg, 'utf8'))) {
