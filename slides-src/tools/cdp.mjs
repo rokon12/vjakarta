@@ -6,6 +6,8 @@ import { join } from 'node:path';
 
 const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 export const sleep = ms => new Promise(done => setTimeout(done, ms));
+// a deck is ready when the engine says so; any other page when it has loaded
+const READY = "document.readyState === 'complete' && (!document.getElementById('stage') || document.documentElement.classList.contains('is-ready'))";
 
 // port 0 lets Chrome pick a free port and tell us through DevToolsActivePort
 export async function browser(port = 0, { width = 1920, height = 1080, mobile = false, touch = false } = {}) {
@@ -56,7 +58,7 @@ export async function browser(port = 0, { width = 1920, height = 1080, mobile = 
       await send('Page.navigate', { url: 'about:blank' });
       await send('Page.navigate', { url: address });
       for (let i = 0; i < 120; i++) {
-        if (await evaluate("document.documentElement.classList.contains('is-ready')")) return;
+        if (await evaluate(READY)) return;
         await sleep(50);
       }
       throw new Error('the deck never became ready at ' + address);
