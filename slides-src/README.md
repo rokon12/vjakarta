@@ -40,5 +40,21 @@
 | `tools/code_check.py` | Checks every line of Java on a slide against the git tag its `data-source` cites; `…` stands for elided text |
 | `tools/numbers_sheet.sh` | Rebuilds `specs/_numbers.md` from `../docs/numbers.md` and the vfun numbers this deck reuses |
 | `tools/series_data.py` | Writes the measured per-second series from `../docs/series/` into `scenes/p99.js` |
+| `tools/style_probe.mjs` | Reads the built deck in headless Chrome: computed `styles` in a state, every `colors` painted, text below readable `contrast`, `fonts`, the phone `page` and a touch `swipe`; `--device phone-upright` or `phone-sideways` emulates a phone |
+| `tools/cdp.mjs` | The headless Chrome plumbing `live_run.mjs` and `style_probe.mjs` share |
 
 The screenshot tools expect Chrome in `/Applications`. `node build.mjs --no-notes` builds a copy without the speaker notes.
+
+## Themes
+
+The colors and fonts live in `themes/`, one file per look; `core/theme.css` only uses their variables.
+
+| | |
+|---|---|
+| `themes/jakarta-light.css` | The default. White paper in the Jakarta EE colors, Inter for the slide text; the notebook pieces (stamps, red pen, taped labels, readouts) recolored. Text inside the diagrams keeps its condensed face |
+| `themes/blueprint.css` | The vfun look: graph paper, navy ink, yellow tape |
+
+`node build.mjs --theme blueprint` builds the other look; switching for good is the one line `const DEFAULT_THEME = 'jakarta-light';` in `build.mjs`. A theme can embed a font from `assets/fonts/` with `url("font:<file>")`; the build inlines it, so the deck still works offline. Inter is under the SIL Open Font License, in `assets/fonts/OFL.txt`.
+
+`tools/test_theme.py` pins the Jakarta colors, checks no blueprint navy or yellow is painted in any state and every text run is readable; `tools/test_phone.py` checks the deck on a phone (the hint under an upright slide, no fullscreen button, swiping).
+
