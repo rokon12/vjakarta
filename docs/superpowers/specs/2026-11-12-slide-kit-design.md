@@ -45,7 +45,7 @@ From the official Jakarta EE branding guidelines (jakarta.ee/legal/trademark_gui
 | Body text, captions | Grey `#2F4A60` (the guidelines allow Grey only for body copy) |
 | Accent (rules, highlights), "late" data | Orange `#FF7110` |
 | Chart lines, secondary data, footer | Light Blue `#5EA9FF` |
-| "Failed" data | a red, as in the mockup (`#d6203c`) |
+| "Failed" and "late" data | today's red (`#d31f2b`), per the data-color rule below |
 | Code panel | a pale tint of the purple (mockup: `#f3f5ff`), purple text, keywords Royal Blue, highlighted tokens a dark orange (mockup: `#d05700`) |
 
 - Yellow `#FDB940` is not used: the guidelines reserve it for the logo, and there is no logo.
@@ -93,7 +93,7 @@ Talk-specific content stays out: vjakarta's scenes (overload, p99, carriers and 
 ## Calls I made (the speaker can override)
 
 - **Kit name and place:** working name `slidekit`, at `~/projects/slidekit`, GitHub `rokon12/slidekit` marked as a template repo, **private** until the speaker says otherwise.
-- **Inter is embedded** in the built deck (it is under the SIL Open Font License), so Pages viewers without Inter installed see the same deck. The presenting Mac already has Inter.
+- **Inter is embedded** in the built deck (it is under the SIL Open Font License, whose text ships next to the font file). This is required, not a nicety: Inter is not installed on the presenting Mac (`fc-match Inter` gives Verdana), and the deck must work offline.
 - **Kit default theme:** `jakarta-light`.
 - **One Jakarta light theme, shared:** the kit's `jakarta-light` is the same theme vjakarta gets in Part 1 (notebook pieces recolored), not a separate plainer variant. A plainer variant can be added later as a third theme.
 - **Part 1 keeps the blueprint look reachable:** the theme swap is done so switching back is a one-line change, in case the speaker changes their mind before December 1.
