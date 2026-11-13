@@ -3,12 +3,10 @@
 // the right arrow on the state before it; after the motion has had time to finish, the text on
 // screen is compared with the ?still frame of the same state.
 //   node tools/live_run.mjs <deck.html> <out-dir> [wait-ms] [workers]
-import { spawn } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import { browser, sleep } from './cdp.mjs';
 
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const [deck, outDir, waitArg, workersArg] = process.argv.slice(2);
 if (!deck || !outDir) {
   console.error('usage: node tools/live_run.mjs <deck.html> <out-dir> [wait-ms] [workers]');
@@ -18,7 +16,6 @@ const WAIT = Number(waitArg || 7000);
 const WORKERS = Number(workersArg || 8);
 const url = 'file://' + resolve(deck);
 mkdirSync(outDir, { recursive: true });
-const sleep = ms => new Promise(done => setTimeout(done, ms));
 
 const VISIBLE = `(() => {
   const slide = document.querySelector('.slide.is-active');
@@ -41,78 +38,6 @@ const FPS = `new Promise(done => {
   const frame = () => { frames++; performance.now() - from < 1000 ? requestAnimationFrame(frame) : done(frames); };
   requestAnimationFrame(frame);
 })`;
-
-async function browser(port) {
-  const profile = mkdtempSync(join(tmpdir(), 'deck-live-'));
-  const chrome = spawn(CHROME, ['--headless=new', '--disable-gpu', '--hide-scrollbars', '--force-device-scale-factor=1',
-    '--window-size=1920,1080', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, 'about:blank'], { stdio: 'ignore' });
-  let target;
-  for (let i = 0; i < 75 && !target; i++) {
-    await sleep(200);
-    try {
-      target = (await (await fetch(`http://127.0.0.1:${port}/json/list`)).json()).find(t => t.type === 'page');
-    } catch {}
-  }
-  if (!target) throw new Error('Chrome did not start on port ' + port);
-  const socket = new WebSocket(target.webSocketDebuggerUrl);
-  await new Promise(done => socket.addEventListener('open', done, { once: true }));
-  const pending = new Map();
-  const errors = [];
-  let id = 0;
-  socket.addEventListener('message', event => {
-    const message = JSON.parse(event.data);
-    if (message.id) {
-      pending.get(message.id)?.(message.result || message.error);
-      pending.delete(message.id);
-    } else if (message.method === 'Runtime.exceptionThrown') {
-      const details = message.params.exceptionDetails;
-      errors.push(details.exception?.description || details.text);
-    } else if (message.method === 'Runtime.consoleAPICalled' && message.params.type === 'error') {
-      errors.push(message.params.args.map(arg => arg.value ?? arg.description).join(' '));
-    }
-  });
-  const send = (method, params = {}) => new Promise(done => {
-    pending.set(++id, done);
-    socket.send(JSON.stringify({ id, method, params }));
-  });
-  await send('Runtime.enable');
-  await send('Page.enable');
-  await send('Emulation.setDeviceMetricsOverride', { width: 1920, height: 1080, deviceScaleFactor: 1, mobile: false });
-  const evaluate = async expression =>
-    (await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true })).result?.value;
-  return {
-    send,
-    evaluate,
-    errors,
-    async open(address) {
-      await send('Page.navigate', { url: 'about:blank' });
-      await send('Page.navigate', { url: address });
-      for (let i = 0; i < 120; i++) {
-        if (await evaluate("document.documentElement.classList.contains('is-ready')")) return;
-        await sleep(50);
-      }
-      throw new Error('the deck never became ready at ' + address);
-    },
-    async press(key, code) {
-      const event = { key, code: key, windowsVirtualKeyCode: code, nativeVirtualKeyCode: code };
-      await send('Input.dispatchKeyEvent', { type: 'keyDown', ...event });
-      await send('Input.dispatchKeyEvent', { type: 'keyUp', ...event });
-    },
-    async shoot(file) {
-      const shot = await send('Page.captureScreenshot', { format: 'png' });
-      writeFileSync(file, Buffer.from(shot.data, 'base64'));
-    },
-    close() {
-      socket.close();
-      chrome.once('exit', () => {
-        try {
-          rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
-        } catch {}
-      });
-      chrome.kill();
-    },
-  };
-}
 
 const first = await browser(9400);
 await first.open(url + '?list');
