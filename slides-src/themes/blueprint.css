@@ -1,0 +1,34 @@
+/* The blueprint look: graph paper, navy ink, red pen, yellow tape. */
+
+:root {
+  --paper: #eef2f3;
+  --paper-2: #dfe8eb;
+  --white: #fbfdfd;
+  --grid: #dce7eb;
+  --grid-major: #bdd2da;
+  --ink: #0e1b2c;
+  --ink-2: #3c4c60;
+  --plate: #16263a;
+  --red: #d31f2b;
+  --red-ink: #b5121d;
+  --blue: #0a3fb8;
+  --yellow: #ffc400;
+  --green: #0a7d4f;
+
+  --dc: "DIN Condensed", "Avenir Next Condensed", "Arial Narrow", sans-serif;
+  --da: "DIN Alternate", "Avenir Next", "Helvetica Neue", sans-serif;
+  --mono: "JetBrains Mono", Menlo, Monaco, monospace;
+  --hand: "Bradley Hand", "Noteworthy", "Marker Felt", cursive;
+
+  --letterbox: #0b121c;
+  --slide-ms: 460ms;
+  --step-ms: 320ms;
+  --feed: cubic-bezier(0.2, 0.7, 0.1, 1);
+
+  --font-ui: var(--da);
+  --font-mono: var(--mono);
+  --overlay-ground: rgba(14, 27, 44, 0.97);
+  --overlay-ground-solid: #0e1b2c;
+  --overlay-ink: #fbfdfd;
+  --overlay-pick: #ffc400;
+}

@@ -3,6 +3,7 @@
 //   node build.mjs                          -> dist/slides.html (every slide)
 //   node build.mjs --only 12-,14- --out x   -> only slide files whose name contains one of the fragments
 //   node build.mjs --scenes overload        -> only these scene files (default: all of them)
+//   node build.mjs --theme blueprint        -> themes/blueprint.css instead of DEFAULT_THEME
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -14,7 +15,10 @@ const opt = name => {
   return i >= 0 ? argv[i + 1] : null;
 };
 
+const DEFAULT_THEME = 'blueprint';
+
 const out = resolve(opt('out') || join(here, 'dist', 'slides.html'));
+const theme = opt('theme') || DEFAULT_THEME;
 const only = opt('only') ? opt('only').split(',').filter(Boolean) : null;
 const scenes = opt('scenes') ? opt('scenes').split(',').filter(Boolean) : null;
 
@@ -22,6 +26,19 @@ const read = path => readFileSync(join(here, path), 'utf8');
 const list = (dir, ext) =>
   existsSync(join(here, dir)) ? readdirSync(join(here, dir)).filter(f => f.endsWith(ext)).sort() : [];
 const sceneFiles = ext => list('scenes', ext).filter(f => !scenes || scenes.includes(f.slice(0, -ext.length)));
+
+const fail = message => {
+  console.error(message);
+  process.exit(1);
+};
+
+const themes = list('themes', '.css').map(f => f.slice(0, -'.css'.length));
+if (!themes.includes(theme)) fail(`unknown theme: ${theme} (have: ${themes.join(', ')})`);
+const themeCss = read(`themes/${theme}.css`).replace(/url\("font:([^"]+)"\)/g, (_, file) => {
+  const path = `assets/fonts/${file}`;
+  if (!existsSync(join(here, path))) fail(`missing font: ${path}`);
+  return `url("data:font/woff2;base64,${readFileSync(join(here, path)).toString('base64')}")`;
+});
 
 let slideFiles = list('slides', '.html');
 if (only) slideFiles = slideFiles.filter(f => only.some(fragment => f.includes(fragment)));
@@ -52,7 +69,7 @@ for (const f of [...sceneFiles('.js').map(f => 'scenes/' + f), 'core/core.js']) 
 }
 
 const parts = {
-  '/*@core.css*/': read('core/base.css').trim() + '\n\n' + read('core/theme.css').trim(),
+  '/*@core.css*/': [read('core/base.css'), read('core/theme.css'), themeCss].map(css => css.trim()).join('\n\n'),
   '<!--@scenes.css-->': sceneCss,
   '<!--@slides-->': slides,
   '<!--@chrome-->': read('core/chrome.html').trim(),
