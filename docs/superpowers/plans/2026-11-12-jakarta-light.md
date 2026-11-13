@@ -19,6 +19,7 @@
 - Slide text (headlines, say/body/caption/rows/kickers/title/tblock text) uses Inter. SVG text inside scenes, stamps, cue labels, digit readouts and the handwriting notes keep the faces they have in the blueprint theme.
 - Inter is embedded (Inter is not installed on the presenting Mac). The built deck stays one self-contained file that works offline from `file://`.
 - Switching back is one line: `const DEFAULT_THEME = 'jakarta-light';` in `build.mjs` (or `node build.mjs --theme blueprint`).
+- Phones: see the spec's "Phones" section; Part 1 does it in stylesheets only (`core/base.css`), desktop pixels unchanged.
 - Must stay green at the end: `python3 -m unittest discover -s tools -p 'test_*.py'`, `python3 ../tools/test_series.py`, `node tools/check.mjs ../slides.html selftest` (38 slides, 102 states), `python3 tools/numbers_check.py ../slides.html specs/_numbers.md`, `python3 tools/code_check.py ../slides.html ..`, `node tools/check.mjs ../slides.html fitcheck` with no spills beyond the four known ones (`leak.0` comma and ms, `cancel.0` ms, pinning comma), and `node tools/live_run.mjs` matching at least as well as before (99/102, the 3 known overload flickers).
 - Commit messages: short, lowercase, plain English, like the existing history.
 
@@ -291,7 +292,69 @@ git add themes/jakarta-light.css tools/test_theme.py
 git commit -m "recolor the footer, markers and overlays, and keep every label readable"
 ```
 
-### Task 5: Full check, publish
+### Task 5: Phones
+
+**Files:**
+- Modify: `core/base.css` (mobile rules, so both themes get them), `tools/cdp.mjs`, `tools/style_probe.mjs`
+- Test: `tools/test_phone.py`
+
+**Interfaces:**
+- Consumes: Task 2's probe.
+- Produces: `openDeck(url, { width, height, mobile = false, touch = false })` (device emulation and touch through `Emulation.setDeviceMetricsOverride` and `Emulation.setTouchEmulationEnabled`); every probe mode accepts `--device phone-upright` (390 × 844, mobile, touch) or `--device phone-sideways` (844 × 390); a new probe mode `swipe <from-state> <left|right>` that dispatches a horizontal touch swipe on `#viewport` and prints `{ "hash": location.hash }`; a new probe mode `page` printing `{ "scrollWidth", "innerWidth", "stage": stageRect, "hint": { "content", "display", "rect" } }` for the `body::after` hint.
+- The hint, exact text: `Turn your phone sideways for a bigger slide · swipe to move`. Shown only under `@media (pointer: coarse) and (orientation: portrait)`, below the stage, in the theme's body-text color on the letterbox, at least 16 px.
+
+- [ ] **Step 1: Take a desktop baseline of the current build**
+
+Run: `node build.mjs --out tmp/desktop-before.html && node tools/shoot_all.mjs tmp/desktop-before.html tmp/desktop-before`
+
+- [ ] **Step 2: Write the failing tests**
+
+```python
+class PhoneTest(unittest.TestCase):
+    def test_upright_phone_shows_the_hint_under_the_slide(self):
+        page = probe('../slides.html', 'page', '--device', 'phone-upright')
+        self.assertEqual('"Turn your phone sideways for a bigger slide · swipe to move"', page['hint']['content'])
+        self.assertGreaterEqual(page['hint']['rect']['top'], page['stage']['bottom'])
+        self.assertLessEqual(page['scrollWidth'], page['innerWidth'])
+
+    def test_sideways_phone_has_no_hint(self):
+        self.assertEqual('none', probe('../slides.html', 'page', '--device', 'phone-sideways')['hint']['display'])
+
+    def test_no_fullscreen_button_on_touch_screens(self):
+        self.assertEqual(('none',), style('title.0', '#deck-fs', 'display', device='phone-sideways'))
+
+    def test_taps_are_not_eaten_by_double_tap_zoom(self):
+        self.assertEqual(('manipulation',), style('title.0', '#viewport', 'touch-action', device='phone-upright'))
+
+    def test_hint_is_readable(self):
+        self.assertEqual([], probe('../slides.html', 'contrast', '--device', 'phone-upright'))
+
+    def test_swiping_left_moves_forward(self):   # guard: the engine already does this; it must keep working
+        self.assertEqual('#hands', probe('../slides.html', 'swipe', 'title.0', 'left', '--device', 'phone-sideways')['hash'].split('.')[0])
+```
+
+(Use the hash format `core.js` writes; adjust the `'#hands'` comparison to it.)
+
+- [ ] **Step 3: Run them to see them fail**
+
+Run: `python3 -m unittest tools/test_phone.py -v`
+Expected: FAIL on everything except the swipe guard.
+
+- [ ] **Step 4: Add device emulation and the two probe modes; add the mobile rules to `core/base.css`**
+
+- [ ] **Step 5: Run the tests, and prove the desktop did not change**
+
+Run: `node build.mjs --out ../slides.html && python3 -m unittest tools/test_phone.py -v && node build.mjs --out tmp/desktop-after.html && node tools/shoot_all.mjs tmp/desktop-after.html tmp/desktop-after && for f in tmp/desktop-before/*.png; do cmp -s "$f" "tmp/desktop-after/$(basename "$f")" || echo "DIFF $f"; done`
+Expected: 6 tests OK, no `DIFF` lines.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add core/base.css tools/cdp.mjs tools/style_probe.mjs tools/test_phone.py
+git commit -m "help people who open the deck on a phone"
+```
+
+### Task 6: Full check, publish
 
 **Files:**
 - Modify: `README.md` (a short "Themes" section: the two themes, `--theme`, `DEFAULT_THEME`, `url("font:…")`, the probe), `../slides.html`, `../index.html`

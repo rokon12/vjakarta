@@ -72,6 +72,15 @@ Contents:
 
 Talk-specific content stays out: vjakarta's scenes (overload, p99, carriers and the rest), numbers sheets, the book cover, slide text other than the example deck.
 
+## Phones
+
+The speaker asked to mind mobile UX (2026-11-12, when approving the plans). People open the published deck from a link on their phones, and the speaker reads the cue sheet on a phone.
+
+- Today the engine already swipes left/right between slides, advances on a tap, and scales the slide to the screen. On a phone held upright the 16:9 slide is a thin strip with unreadably small text, a tap can only go forward, and the fullscreen button only appears on mouse movement (and does not work on iPhones).
+- **vjakarta (Part 1), stylesheet only:** on touch screens held upright, a short line under the slide says to turn the phone sideways and swipe to move; the fullscreen button is hidden on touch screens; double-tap zoom does not swallow taps. Desktop looks exactly as before.
+- **The kit (Part 2), in the engine:** a tap on the left third goes back, elsewhere forward; a phone held upright gets Back and Next buttons (at least 44 px tall) and a slide counter under the slide; the help overlay lists the touch gestures on touch screens; the generated cue sheet fits a 390 px wide phone with no sideways scrolling, tap targets at least 44 px and body text at least 16 px.
+- Checked by running the built deck in headless Chrome emulating a phone (390 × 844 upright, 844 × 390 sideways, touch on).
+
 ## Constraints
 
 - Building a deck needs only `node` and `python3`, as today. No `npm install` step.
