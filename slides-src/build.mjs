@@ -15,7 +15,7 @@ const opt = name => {
   return i >= 0 ? argv[i + 1] : null;
 };
 
-const DEFAULT_THEME = 'blueprint';
+const DEFAULT_THEME = 'jakarta-light';
 
 const out = resolve(opt('out') || join(here, 'dist', 'slides.html'));
 const theme = opt('theme') || DEFAULT_THEME;

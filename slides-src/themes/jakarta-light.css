@@ -1,0 +1,124 @@
+/* Jakarta light: white paper in the Jakarta EE colors, Inter for the slide text.
+   The notebook pieces stay; only their colors change. Text inside the diagrams,
+   the stamps, the cue labels, the readouts and the red pen keep their faces. */
+
+@font-face {
+  font-family: Inter;
+  src: url("font:InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: block;
+}
+
+:root {
+  --paper: #FFFFFF;
+  --paper-2: #F3F5FF;
+  --white: #FFFFFF;
+  --grid: #E6E9FB;
+  --grid-major: #CDD3F5;
+  --ink: #1B208B;
+  --ink-2: #2F4A60;
+  --plate: #1B208B;
+  --red: #d31f2b;
+  --red-ink: #b5121d;
+  --blue: #182CB9;
+  --yellow: #FF7110;
+  --green: #0a7d4f;
+  --orange: #FF7110;
+  --light-blue: #5EA9FF;
+
+  --sans: Inter, "Helvetica Neue", Arial, sans-serif;
+  --dc: "DIN Condensed", "Avenir Next Condensed", "Arial Narrow", sans-serif;
+  --da: "DIN Alternate", "Avenir Next", "Helvetica Neue", sans-serif;
+  --mono: "JetBrains Mono", Menlo, Monaco, monospace;
+  --hand: "Bradley Hand", "Noteworthy", "Marker Felt", cursive;
+
+  --letterbox: #0d1050;
+  --slide-ms: 460ms;
+  --step-ms: 320ms;
+  --feed: cubic-bezier(0.2, 0.7, 0.1, 1);
+
+  --font-ui: var(--da);
+  --font-mono: var(--mono);
+  --overlay-ground: rgba(13, 16, 80, 0.97);
+  --overlay-ground-solid: #0d1050;
+  --overlay-ink: #FFFFFF;
+  --overlay-pick: #FF7110;
+}
+
+/* ---------- ground: plain white, with the three colors down the left edge ---------- */
+
+#stage { background-image: none; }
+
+#stage::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  pointer-events: none;
+  background: linear-gradient(#1B208B 0 40%, #182CB9 40% 70%, #FF7110 70%);
+}
+
+#feed {
+  background-image: radial-gradient(circle at 30px 23px, #A9B0E6 0 8px, transparent 9px);
+  border-bottom-color: var(--grid-major);
+}
+
+/* ---------- slide text in Inter ---------- */
+
+.headline,
+[data-layout="title"] h1,
+[data-layout="title"] .lede,
+.say,
+.body,
+.caption,
+.rows > li > span,
+.tblock,
+[data-layout="section"] h2,
+[data-layout="check"] .q,
+.book-title {
+  font-family: var(--sans);
+}
+
+.headline,
+[data-layout="title"] h1,
+.say,
+[data-layout="section"] h2,
+[data-layout="check"] .q {
+  font-weight: 800;
+  text-transform: none;
+  letter-spacing: -0.02em;
+}
+
+.headline { font-size: 104px; }
+.headline.sm { font-size: 84px; }
+[data-layout="title"] h1 { font-size: 184px; }
+.say { font-size: 124px; }
+.say.xl { font-size: 158px; }
+[data-layout="section"] h2 { font-size: 150px; }
+[data-layout="check"] .q { font-size: 104px; }
+
+.caption,
+.body { color: var(--ink-2); }
+
+/* ---------- the notebook pieces, recolored ---------- */
+
+.cue { box-shadow: 6px 7px 0 rgba(27, 32, 139, 0.22); }
+
+.code {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+
+.code .hl {
+  background-image: linear-gradient(rgba(255, 113, 16, 0.18), rgba(255, 113, 16, 0.18));
+  color: #d05700;
+}
+
+.book { box-shadow: 10px 12px 0 rgba(27, 32, 139, 0.22); }
+
+.book::after {
+  background: rgba(255, 113, 16, 0.86);
+  box-shadow: 2px 3px 0 rgba(27, 32, 139, 0.16);
+}
