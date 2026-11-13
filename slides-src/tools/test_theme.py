@@ -18,6 +18,7 @@ def probe(deck, mode, *args):
 
 def style(state, selector, *props, pseudo=None, deck=DECK):
     path = HERE / 'tmp' / 'theme-spec.json'
+    path.parent.mkdir(exist_ok=True)
     path.write_text(json.dumps([{'state': state, 'selector': selector, 'pseudo': pseudo, 'props': list(props)}]))
     values = probe(deck, 'styles', path)[0]['values']
     if values is None:
@@ -102,6 +103,14 @@ class JakartaLightTest(unittest.TestCase):
 
     def test_the_footer_ruler_is_dark_purple(self):
         self.assertEqual(('rgb(27, 32, 139)',), style('big.1', '#chrome .ruler line', 'stroke'))
+
+    def test_a_highlight_waits_for_its_click(self):
+        self.assertNotEqual(('rgb(208, 87, 0)',), style('door-code.0', '.code .hl[data-step]', 'color'))
+        self.assertEqual(('rgb(208, 87, 0)',), style('door-code.3', '.code .hl[data-step]', 'color'))
+
+    def test_turned_away_is_grey_as_the_notes_say(self):
+        for state, selector, prop in [('rebuilt.1', '.bar.is-off', 'fill'), ('door.2', '.tok.is-off', 'fill')]:
+            self.assertEqual(('rgb(214, 218, 224)',), style(state, selector, prop), selector)
 
 if __name__ == '__main__':
     unittest.main()

@@ -17,6 +17,7 @@ def probe(deck, mode, *args):
 
 def probe_styles(deck, spec):
     path = HERE / 'tmp' / 'probe-spec.json'
+    path.parent.mkdir(exist_ok=True)
     path.write_text(json.dumps(spec))
     return probe(deck, 'styles', path)
 

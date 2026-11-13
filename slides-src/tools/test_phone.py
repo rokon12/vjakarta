@@ -19,6 +19,7 @@ def probe(mode, *args, device):
 
 def style(state, selector, *props, device):
     path = HERE / 'tmp' / 'phone-spec.json'
+    path.parent.mkdir(exist_ok=True)
     path.write_text(json.dumps([{'state': state, 'selector': selector, 'props': list(props)}]))
     values = probe('styles', path, device=device)[0]['values']
     return tuple(values[p] for p in props)

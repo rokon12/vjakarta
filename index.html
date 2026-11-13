@@ -1295,6 +1295,14 @@ html.is-full #deck-fs .exit { display: inline; }
   color: #d05700;
 }
 
+/* a highlight that sweeps in on a click keeps its line's color until then */
+.code .hl[data-step]:not(.is-on) { color: inherit; }
+
+/* turned away: grey, as the notes say */
+.tok.is-off,
+.bar.is-off { fill: #D6DAE0; }
+.key i.is-off { background: #D6DAE0; }
+
 .book { box-shadow: 10px 12px 0 rgba(27, 32, 139, 0.22); }
 
 .book::before,
