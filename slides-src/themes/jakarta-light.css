@@ -91,11 +91,14 @@
   letter-spacing: -0.02em;
 }
 
-.headline { font-size: 104px; }
-.headline.sm { font-size: 84px; }
-[data-layout="title"] h1 { font-size: 184px; }
+.headline { font-size: 96px; }
+.headline.sm { font-size: 74px; }
+[data-layout="title"] h1 { font-size: 148px !important; }
 .say { font-size: 124px; }
-.say.xl { font-size: 158px; }
+.say.xl { font-size: 140px; }
+.say.md { font-size: 106px; }
+.say.sm { font-size: 74px; }
+.tblock b { font-size: 50px; }
 [data-layout="section"] h2 { font-size: 150px; }
 [data-layout="check"] .q { font-size: 104px; }
 
@@ -118,7 +121,26 @@
 
 .book { box-shadow: 10px 12px 0 rgba(27, 32, 139, 0.22); }
 
+.book::before,
 .book::after {
   background: rgba(255, 113, 16, 0.86);
   box-shadow: 2px 3px 0 rgba(27, 32, 139, 0.16);
 }
+
+/* ---------- arrowheads and hatching drawn in chrome.html ---------- */
+
+.qr svg .qrline { stroke: var(--ink); }
+
+#arrow path { fill: var(--ink); }
+#arrow-red path { fill: var(--red); }
+#hatch-wait rect:first-child,
+#hatch-late rect:first-child { fill: var(--white); }
+#hatch-wait rect:last-child { fill: var(--blue); }
+#hatch-late rect:last-child { fill: var(--red); }
+
+/* ---------- footer: the ruler in purple, the time used in light blue ---------- */
+
+#chrome .ruler line { stroke: var(--ink); }
+#chrome .ruler text { fill: var(--ink); }
+#chrome .done { background: var(--light-blue); }
+#chrome .here::after { border-top-color: var(--orange); }

@@ -91,5 +91,17 @@ class JakartaLightTest(unittest.TestCase):
         self.assertIn("const DEFAULT_THEME = 'jakarta-light';", (HERE / 'build.mjs').read_text())
 
 
+    def test_no_yellow_and_no_blueprint_navy_or_paper_is_painted(self):
+        painted = {c['value'] for c in probe(DECK, 'colors')}
+        for banned in ('rgb(255, 196, 0)', 'rgba(255, 196, 0', 'rgb(253, 185, 64)',
+                       'rgb(14, 27, 44)', 'rgb(22, 38, 58)', 'rgb(238, 242, 243)', 'rgb(10, 63, 184)'):
+            self.assertFalse([v for v in painted if v.startswith(banned)], banned)
+
+    def test_every_text_run_is_readable(self):
+        self.assertEqual([], probe(DECK, 'contrast'))
+
+    def test_the_footer_ruler_is_dark_purple(self):
+        self.assertEqual(('rgb(27, 32, 139)',), style('big.1', '#chrome .ruler line', 'stroke'))
+
 if __name__ == '__main__':
     unittest.main()
