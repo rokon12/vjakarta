@@ -726,6 +726,12 @@ svg .dc { text-transform: none; }
 .say em { font-style: normal; color: var(--red); }
 .say.xl { font-size: 190px; line-height: 0.94; }
 
+/* class="bleed": the whole slide on the plate color, the break in a talk (a live demo) */
+.slide.bleed { background-color: var(--plate); color: var(--white); }
+.slide.bleed :is(.say, .say .soft, .body, .caption, .headline) { color: var(--white); }
+.slide.bleed em { color: var(--yellow); }
+.slide.bleed .cue { color: var(--ink); }
+
 .body {
   position: absolute;
   left: 114px;
@@ -1552,6 +1558,13 @@ html.is-full #deck-fs .exit { display: inline; }
   <p class="caption" data-step="2">Every request still waits 100 ms. We stopped <span class="red">queueing for a thread</span>.</p>
 </section>
 
+<!-- 08-part-one.html -->
+<section class="slide" id="part-one" data-layout="section" data-title="Two sales" data-section="The service" data-section-key="service" data-min="6">
+<div class="exp"><small>Part</small>1</div>
+  <h2>Two sales</h2>
+  <p class="body" style="top:560px;width:1080px">One service, sixteen threads.<br>A small sale, one line to switch.<br>Then the launch.</p>
+</section>
+
 <!-- 08-service.html -->
 <section class="slide" id="service" data-layout="scene" data-title="One reservation, five calls at once" data-section="The service" data-section-key="service" data-min="6" data-steps="3">
   <h2 class="headline">One reservation, five calls at once</h2>
@@ -1560,7 +1573,7 @@ html.is-full #deck-fs .exit { display: inline; }
 </section>
 
 <!-- 09-before-run.html -->
-<section class="slide" id="before-run" data-layout="say" data-title="The small sale on sixteen threads" data-section="The switch" data-section-key="switch" data-min="7.5">
+<section class="slide bleed" id="before-run" data-layout="say" data-title="The small sale on sixteen threads" data-section="The switch" data-section-key="switch" data-min="7.5">
 <p class="say">A small sale.<br>Sixteen platform threads.</p>
   <p class="body lg" style="top:420px">60 reservations a second, then 120 more a second for 6 seconds.</p>
   <p class="say md" style="top:580px" data-step="1"><em>Watch p99.</em></p>
@@ -1584,7 +1597,7 @@ html.is-full #deck-fs .exit { display: inline; }
 </section>
 
 <!-- 12-big-ask.html -->
-<section class="slide" id="big-ask" data-layout="say" data-title="The launch" data-section="The switch" data-section-key="switch" data-min="12">
+<section class="slide bleed" id="big-ask" data-layout="say" data-title="The launch" data-section="The switch" data-section-key="switch" data-min="12">
 <p class="say">The launch.<br>700 a second.</p>
   <p class="body lg" style="top:420px">The same service, the same switch. For three seconds.</p>
   <p class="say md" style="top:580px" data-step="1"><em>What happens to p99?</em></p>
@@ -1774,15 +1787,10 @@ html.is-full #deck-fs .exit { display: inline; }
 </section>
 
 <!-- 35-jobs.html -->
-<section class="slide" id="jobs" data-layout="rows" data-title="Threads got free. Nothing else did." data-section="Wrap" data-section-key="wrap" data-min="41.5">
-<p class="say md">Threads got free.<br>Nothing else did.</p>
-  <p class="body" style="top:372px">Sixteen threads were doing three jobs nobody gave them:</p>
-  <ol class="rows tight" style="top:470px">
-    <li data-step="1"><b>1</b><span>keeping the database under its 20 connections</span></li>
-    <li data-step="2"><b>2</b><span>keeping the provider under its limit, so @Retry never fired</span></li>
-    <li data-step="3"><b>3</b><span>being the one number in the system that said “enough”</span></li>
-  </ol>
-  <div class="stamp red" style="right:150px;top:150px;--tilt:-7deg;font-size:110px" data-step="4">Yours now</div>
+<section class="slide" id="jobs" data-layout="say" data-title="Threads got free. Nothing else did." data-section="Wrap" data-section-key="wrap" data-min="41.5">
+<p class="say">Threads got free.<br>Nothing else did.</p>
+  <p class="body lg" style="top:420px">Sixteen threads were doing three jobs nobody gave them.</p>
+  <p class="say md" style="top:580px" data-step="1"><em>Those jobs are yours now.</em></p>
 </section>
 
 <!-- 36-thanks.html -->
@@ -2023,6 +2031,17 @@ html.is-full #deck-fs .exit { display: inline; }
    },
    {
     "say": "“2,084 milliseconds against 114. But every request still waited its 100 ms. Nothing got faster. We stopped queueing for a thread.”",
+    "tip": null,
+    "run": null,
+    "more": null
+   }
+  ]
+ },
+ "part-one": {
+  "goal": "Open part one.",
+  "clicks": [
+   {
+    "say": "“Part one: two sales. A small sale on the service as it runs today, then the one-line switch, then the launch.”",
     "tip": null,
     "run": null,
     "more": null
@@ -2588,25 +2607,7 @@ html.is-full #deck-fs .exit { display: inline; }
   "goal": "The whole talk in one slide.",
   "clicks": [
    {
-    "say": "“Threads got free. Nothing else did. Sixteen threads were doing three jobs nobody gave them.”",
-    "tip": null,
-    "run": null,
-    "more": null
-   },
-   {
-    "say": "“Keeping the database under its 20 connections.”",
-    "tip": null,
-    "run": null,
-    "more": null
-   },
-   {
-    "say": "“Keeping the provider under its limit, so @Retry never fired.”",
-    "tip": null,
-    "run": null,
-    "more": null
-   },
-   {
-    "say": "“Being the one number in the system that said ‘enough’.”",
+    "say": "“Threads got free. Nothing else did. Sixteen threads were doing three jobs nobody gave them: keeping the database under its 20 connections, keeping the provider under its limit, so @Retry never fired, and being the one number in the system that said ‘enough’.”",
     "tip": null,
     "run": null,
     "more": null
