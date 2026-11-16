@@ -562,6 +562,12 @@ svg .dc { text-transform: none; }
 .say em { font-style: normal; color: var(--red); }
 .say.xl { font-size: 190px; line-height: 0.94; }
 
+/* class="bleed": the whole slide on the plate color, the break in a talk (a live demo) */
+.slide.bleed { background-color: var(--plate); color: var(--white); }
+.slide.bleed :is(.say, .say .soft, .body, .caption, .headline) { color: var(--white); }
+.slide.bleed em { color: var(--yellow); }
+.slide.bleed .cue { color: var(--ink); }
+
 .body {
   position: absolute;
   left: 114px;

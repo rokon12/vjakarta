@@ -58,9 +58,10 @@ def cue(command, step=None, small=False):
             f'<div class="c">$ {command}<span class="cur"></span></div></div>')
 
 
-def slide(file, sid, layout, title, section, key, minute, body, steps=None):
+def slide(file, sid, layout, title, section, key, minute, body, steps=None, cls=None):
     s = f' data-steps="{steps}"' if steps is not None else ''
-    text = (f'<section class="slide" id="{sid}" data-layout="{layout}" data-title="{html.escape(title)}" '
+    classes = f'slide {cls}' if cls else 'slide'
+    text = (f'<section class="{classes}" id="{sid}" data-layout="{layout}" data-title="{html.escape(title)}" '
             f'data-section="{section}" data-section-key="{key}" data-min="{minute}"{s}>\n{body.strip()}\n</section>\n')
     (OUT / file).write_text(text)
 
@@ -134,7 +135,7 @@ slide('09-before-run.html', 'before-run', 'say', 'The small sale on sixteen thre
   <p class="body lg" style="top:420px">60 reservations a second, then 120 more a second for 6 seconds.</p>
   <p class="say md" style="top:580px" data-step="1"><em>Watch p99.</em></p>
   {cue('./run.sh load before small', step=1)}
-''')
+''', cls='bleed')
 
 slide('10-switch.html', 'switch', 'code', 'The switch', 'The switch', 'switch', 9, f'''
   <h2 class="headline">The switch</h2>
@@ -149,7 +150,7 @@ slide('12-big-ask.html', 'big-ask', 'say', 'The launch', 'The switch', 'switch',
   <p class="body lg" style="top:420px">The same service, the same switch. For three seconds.</p>
   <p class="say md" style="top:580px" data-step="1"><em>What happens to p99?</em></p>
   {cue('./run.sh load switched big', step=1)}
-''')
+''', cls='bleed')
 
 # ---------------------------------------------------------------- where it moved
 

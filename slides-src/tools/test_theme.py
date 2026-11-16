@@ -112,5 +112,31 @@ class JakartaLightTest(unittest.TestCase):
         for state, selector, prop in [('rebuilt.1', '.bar.is-off', 'fill'), ('door.2', '.tok.is-off', 'fill')]:
             self.assertEqual(('rgb(214, 218, 224)',), style(state, selector, prop), selector)
 
+    # class="bleed": the slides where the talk turns to the terminal sit on the plate color
+    PLATES = ((DECK, 'rgb(27, 32, 139)', 'rgb(255, 255, 255)', 'rgb(255, 113, 16)', 'rgb(27, 32, 139)'),
+              (BLUEPRINT, 'rgb(22, 38, 58)', 'rgb(251, 253, 253)', 'rgb(255, 196, 0)', 'rgb(14, 27, 44)'))
+
+    def test_the_live_runs_sit_on_the_plate_color(self):
+        for deck, plate, _, _, _ in self.PLATES:
+            for sid in ('before-run', 'big-ask'):
+                self.assertEqual((plate,), style(f'{sid}.0', f'#{sid}', 'background-color', deck=deck), (deck.name, sid))
+
+    def test_every_other_slide_keeps_the_paper(self):
+        self.assertEqual(('rgba(0, 0, 0, 0)',), style('plan.0', '#plan', 'background-color'))
+
+    def test_on_the_plate_text_is_white_and_emphasis_the_accent(self):
+        for deck, _, white, accent, _ in self.PLATES:
+            for selector in ('#before-run .say', '#before-run .body'):
+                self.assertEqual((white,), style('before-run.1', selector, 'color', deck=deck), (deck.name, selector))
+            self.assertEqual((accent,), style('before-run.1', '#before-run em', 'color', deck=deck), deck.name)
+
+    def test_the_terminal_label_keeps_its_dark_command_on_the_plate(self):
+        for deck, _, _, _, ink in self.PLATES:
+            self.assertEqual((ink,), style('big-ask.1', '#big-ask .cue .c', 'color', deck=deck), deck.name)
+
+    def test_every_text_run_is_readable_in_blueprint_too(self):
+        self.assertEqual([], probe(BLUEPRINT, 'contrast'))
+
+
 if __name__ == '__main__':
     unittest.main()
