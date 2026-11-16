@@ -67,6 +67,9 @@ SLIDES = [
         S('Let it play. “Fifty at a time on top. Everyone else queues for a thread.”'),
         S('“2,084 milliseconds against 114. But every request still waited its 100 ms. Nothing got faster. We stopped queueing for a thread.”'),
     ]),
+    ('part-one', 'Two sales', 6, 'Open part one.', [
+        S('“Part one: two sales. A small sale on the service as it runs today, then the one-line switch, then the launch.”'),
+    ]),
     ('service', 'One reservation, five calls at once', 6, 'Show the service and every limit in it, before anything breaks.', [
         S('“This is the service. One reservation holds four seats and charges one card, and it does all five at once on a managed executor.”',
           tip='Start ./run.sh watch in the second terminal now if it is not running.'),
@@ -200,10 +203,7 @@ SLIDES = [
         S('“Three checks for Monday.” Read them. Leave the slide up for a moment.'),
     ]),
     ('jobs', 'Threads got free. Nothing else did.', 41.5, 'The whole talk in one slide.', [
-        S('“Threads got free. Nothing else did. Sixteen threads were doing three jobs nobody gave them.”'),
-        S('“Keeping the database under its 20 connections.”'),
-        S('“Keeping the provider under its limit, so @Retry never fired.”'),
-        S('“Being the one number in the system that said ‘enough’.”'),
+        S('“Threads got free. Nothing else did. Sixteen threads were doing three jobs nobody gave them: keeping the database under its 20 connections, keeping the provider under its limit, so @Retry never fired, and being the one number in the system that said ‘enough’.”'),
         S('“Those jobs are yours now.”'),
     ]),
     ('thanks', 'Thank you', 42.5, 'Close, point at the code, open the floor.', [

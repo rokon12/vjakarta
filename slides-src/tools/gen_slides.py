@@ -128,6 +128,14 @@ slide('04-plan.html', 'plan', 'rows', 'One service, two sales, one rebuild', 'Op
   <div class="cond" style="left:110px;top:900px" data-step="4"><span>Every run</span><b>k6 · the same load · the same laptop · measured, not drawn</b></div>
 ''')
 
+# ---------------------------------------------------------------- part one
+
+slide('08-part-one.html', 'part-one', 'section', 'Two sales', 'The service', 'service', 6, '''
+  <div class="exp"><small>Part</small>1</div>
+  <h2>Two sales</h2>
+  <p class="body" style="top:560px;width:1080px">One service, sixteen threads.<br>A small sale, one line to switch.<br>Then the launch.</p>
+''')
+
 # ---------------------------------------------------------------- the switch
 
 slide('09-before-run.html', 'before-run', 'say', 'The small sale on sixteen threads', 'The switch', 'switch', 7.5, f'''
@@ -330,15 +338,10 @@ slide('34-checks.html', 'checks', 'rows', 'Three checks to take home', 'Wrap', '
   </ol>
 ''')
 
-slide('35-jobs.html', 'jobs', 'rows', 'Threads got free. Nothing else did.', 'Wrap', 'wrap', 41.5, '''
-  <p class="say md">Threads got free.<br>Nothing else did.</p>
-  <p class="body" style="top:372px">Sixteen threads were doing three jobs nobody gave them:</p>
-  <ol class="rows tight" style="top:470px">
-    <li data-step="1"><b>1</b><span>keeping the database under its 20 connections</span></li>
-    <li data-step="2"><b>2</b><span>keeping the provider under its limit, so @Retry never fired</span></li>
-    <li data-step="3"><b>3</b><span>being the one number in the system that said “enough”</span></li>
-  </ol>
-  <div class="stamp red" style="right:150px;top:150px;--tilt:-7deg;font-size:110px" data-step="4">Yours now</div>
+slide('35-jobs.html', 'jobs', 'say', 'Threads got free. Nothing else did.', 'Wrap', 'wrap', 41.5, '''
+  <p class="say">Threads got free.<br>Nothing else did.</p>
+  <p class="body lg" style="top:420px">Sixteen threads were doing three jobs nobody gave them.</p>
+  <p class="say md" style="top:580px" data-step="1"><em>Those jobs are yours now.</em></p>
 ''')
 
 slide('36-thanks.html', 'thanks', 'say', 'Thank you', 'Wrap', 'wrap', 42.5, '''

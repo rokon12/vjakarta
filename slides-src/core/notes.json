@@ -166,6 +166,17 @@
    }
   ]
  },
+ "part-one": {
+  "goal": "Open part one.",
+  "clicks": [
+   {
+    "say": "“Part one: two sales. A small sale on the service as it runs today, then the one-line switch, then the launch.”",
+    "tip": null,
+    "run": null,
+    "more": null
+   }
+  ]
+ },
  "service": {
   "goal": "Show the service and every limit in it, before anything breaks.",
   "clicks": [
@@ -725,25 +736,7 @@
   "goal": "The whole talk in one slide.",
   "clicks": [
    {
-    "say": "“Threads got free. Nothing else did. Sixteen threads were doing three jobs nobody gave them.”",
-    "tip": null,
-    "run": null,
-    "more": null
-   },
-   {
-    "say": "“Keeping the database under its 20 connections.”",
-    "tip": null,
-    "run": null,
-    "more": null
-   },
-   {
-    "say": "“Keeping the provider under its limit, so @Retry never fired.”",
-    "tip": null,
-    "run": null,
-    "more": null
-   },
-   {
-    "say": "“Being the one number in the system that said ‘enough’.”",
+    "say": "“Threads got free. Nothing else did. Sixteen threads were doing three jobs nobody gave them: keeping the database under its 20 connections, keeping the provider under its limit, so @Retry never fired, and being the one number in the system that said ‘enough’.”",
     "tip": null,
     "run": null,
     "more": null

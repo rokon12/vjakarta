@@ -59,5 +59,13 @@ class StoryTest(unittest.TestCase):
         self.assertEqual('Virtual Threads Removed the Thread Limit. What Breaks Next in Jakarta EE?', title)
 
 
+    def test_the_parts_count_up_from_one(self):
+        self.assertEqual(['1', '2', '3'], re.findall(r'<div class="exp"><small>Part</small>(\d+)</div>', DECK))
+
+    def test_the_talk_ends_on_a_statement_and_the_three_jobs_are_said(self):
+        self.assertNotIn('keeping the database under its 20 connections', slide_text('jobs'))
+        for job in ('20 connections', '@Retry never fired', '‘enough’'):
+            self.assertIn(job, said('jobs'))
+
 if __name__ == '__main__':
     unittest.main()

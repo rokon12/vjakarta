@@ -41,7 +41,7 @@ class StyleProbeTest(unittest.TestCase):
         self.assertEqual(['light blue on white'], [f['text'] for f in found])
 
     def test_lists_every_state_the_engine_has(self):
-        self.assertEqual(102, len(probe(BLUEPRINT, 'states')))
+        self.assertEqual(100, len(probe(BLUEPRINT, 'states')))
 
 
 if __name__ == '__main__':

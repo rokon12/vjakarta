@@ -436,6 +436,11 @@ code {
     </div>
     <ol class="cues">
       <li class="cue" data-at="6"><span class="at">08</span><div class="what">
+        <p class="slide-name">Two sales <span class="min">0:06</span></p>
+        <p class="goal">Open part one.</p>
+        <p>“Part one: two sales. A small sale on the service as it runs today, then the one-line switch, then the launch.”</p>
+      </div></li>
+      <li class="cue" data-at="6"><span class="at">09</span><div class="what">
         <p class="slide-name">One reservation, five calls at once <span class="min">0:06</span></p>
         <p class="goal">Show the service and every limit in it, before anything breaks.</p>
         <p><span class="kind">click 0</span>“This is the service. One reservation holds four seats and charges one card, and it does all five at once on a managed executor.”</p>
@@ -444,7 +449,7 @@ code {
         <p><span class="kind">click 2</span>“The executor has sixteen platform threads. Somebody chose sixteen years ago.”</p>
         <p><span class="kind">click 3</span>“And the payment call has @Retry on it, the MicroProfile defaults. So far the provider has never said no, so it has never fired.”</p>
       </div></li>
-      <li class="cue" data-at="7.5"><span class="at">09</span><div class="what">
+      <li class="cue" data-at="7.5"><span class="at">10</span><div class="what">
         <p class="slide-name">The small sale on sixteen threads <span class="min">0:07</span></p>
         <p class="goal">Run the small sale live on platform threads.</p>
         <p><span class="kind">click 0</span>“A small sale. 60 reservations a second, then 120 more a second for six seconds.”</p>
@@ -462,7 +467,7 @@ code {
       <p class="seg-point">Virtual threads fix the small sale. The big sale breaks them.</p>
     </div>
     <ol class="cues">
-      <li class="cue" data-at="9"><span class="at">10</span><div class="what">
+      <li class="cue" data-at="9"><span class="at">11</span><div class="what">
         <p class="slide-name">The switch <span class="min">0:09</span></p>
         <p class="goal">Make the one-line switch live.</p>
         <p><span class="kind">click 0</span>“So we do what everyone does. We switch to virtual threads.”</p>
@@ -471,13 +476,13 @@ code {
         <p><span class="kind run">Run</span><code class="cmd">./run.sh load switched small</code></p>
         <p class="note">First ./run.sh state switched; liberty:dev reloads in about a second. Fallback: results/switched-small-7.html.</p>
       </div></li>
-      <li class="cue" data-at="10.5"><span class="at">11</span><div class="what">
+      <li class="cue" data-at="10.5"><span class="at">12</span><div class="what">
         <p class="slide-name">Same sale, virtual threads <span class="min">0:10</span></p>
         <p class="goal">Virtual threads delivered.</p>
         <p><span class="kind">click 0</span>Plays the platform-thread run. “These charts are the recorded rehearsal runs, so your live numbers just now will be close, not identical. Sixteen threads: p99 a second during the sale. The executor is the queue.”</p>
         <p><span class="kind">click 1</span>Plays the virtual-thread run over it. “Virtual threads: 72 milliseconds. Same sale. Faster. This is the slide everyone shows.”</p>
       </div></li>
-      <li class="cue" data-at="12"><span class="at">12</span><div class="what">
+      <li class="cue" data-at="12"><span class="at">13</span><div class="what">
         <p class="slide-name">The launch <span class="min">0:12</span></p>
         <p class="goal">Set up the climax and ask for a prediction.</p>
         <p><span class="kind">click 0</span>“Now the launch. 700 a second, for three seconds. The same service, the same switch.”</p>
@@ -485,7 +490,7 @@ code {
         <p><span class="kind run">Run</span><code class="cmd">./run.sh load switched big</code></p>
         <p class="note">Watch the second terminal: in flight climbs into the hundreds, retries pour in. Fallback: results/switched-big-1.html.</p>
       </div></li>
-      <li class="cue" data-at="13"><span class="at">13</span><div class="what">
+      <li class="cue" data-at="13"><span class="at">14</span><div class="what">
         <p class="slide-name">The launch: 700 a second <span class="min">0:13</span></p>
         <p class="goal">The climax: p99 explodes.</p>
         <p><span class="kind">click 0</span>“The small sale, faint, for reference.”</p>
@@ -503,7 +508,7 @@ code {
       <p class="seg-point">The queue moved from the thread pool to the connection pool and the provider.</p>
     </div>
     <ol class="cues">
-      <li class="cue" data-at="15"><span class="at">14</span><div class="what">
+      <li class="cue" data-at="15"><span class="at">15</span><div class="what">
         <p class="slide-name">Where the queue moved <span class="min">0:15</span></p>
         <p class="goal">Make the invisible queue visible.</p>
         <p><span class="kind">click 0</span>“The same sale as a picture. This is a simulation, calibrated to the recorded run: it reads 829 in flight at the same moment the real run did. Traffic on the left, the reservations in flight in the middle, the 20 connections, the provider.”</p>
@@ -511,7 +516,7 @@ code {
         <p><span class="kind">click 2</span>Plays on. “When the sale ends it drains in about three seconds.”</p>
         <p><span class="kind">click 3</span>“The totals: 939 payments failed, 4,000 retries, and 9,061 seat holds had to queue for a connection.”</p>
       </div></li>
-      <li class="cue" data-at="17"><span class="at">15</span><div class="what">
+      <li class="cue" data-at="17"><span class="at">16</span><div class="what">
         <p class="slide-name">Sixteen threads were your limit <span class="min">0:17</span></p>
         <p class="goal">Explain why this never happened before the switch.</p>
         <p><span class="kind">click 0</span>“Why didn’t this happen before? Sixteen platform threads meant at most sixteen seat holds and payments at once. Nobody designed that as protection. It was an accident, but it was a limit.”</p>
@@ -519,7 +524,7 @@ code {
         <p><span class="kind">click 2</span>“The limit moved to the 20 connections and the provider. 829 reservations in flight, waiting on one or the other.”</p>
         <p><span class="kind">click 3</span>“Sixteen protected the database and the provider. Nobody wrote it down. And to be fair: sixteen threads would have been worse at this sale, p99 11.7 seconds. They failed slowly, in their own queue, where you could see it.”</p>
       </div></li>
-      <li class="cue" data-at="18.5"><span class="at">16</span><div class="what">
+      <li class="cue" data-at="18.5"><span class="at">17</span><div class="what">
         <p class="slide-name">@Retry was always there <span class="min">0:18</span></p>
         <p class="goal">Show the retry storm.</p>
         <p><span class="kind">click 0</span>“The provider takes 20 at a time. It refused 4,939 charges.”</p>
@@ -527,7 +532,7 @@ code {
         <p><span class="kind">click 2</span>“And 939 customers had their payment fail anyway.”</p>
         <p><span class="kind">click 3</span>“That @Retry was always in the code. It never fired before the switch, because sixteen threads never sent more than the provider could take.”</p>
       </div></li>
-      <li class="cue" data-at="20"><span class="at">17</span><div class="what">
+      <li class="cue" data-at="20"><span class="at">18</span><div class="what">
         <p class="slide-name">Check 1 <span class="min">0:20</span></p>
         <p class="goal">First take-home question.</p>
         <p>“First check to take home.” Read it out. “If the honest answer used to be ‘the thread pool’, that limit is gone the day you switch.”</p>
@@ -542,12 +547,12 @@ code {
       <p class="seg-point">Write the limits down: a door in front, a budget per dependency.</p>
     </div>
     <ol class="cues">
-      <li class="cue" data-at="21"><span class="at">18</span><div class="what">
+      <li class="cue" data-at="21"><span class="at">19</span><div class="what">
         <p class="slide-name">The rebuild <span class="min">0:21</span></p>
         <p class="goal">Open part two.</p>
         <p>“So we rebuild it. Not by going back to sixteen threads. By writing the limits down: a door in front, and a budget behind it for each dependency.”</p>
       </div></li>
-      <li class="cue" data-at="21.5"><span class="at">19</span><div class="what">
+      <li class="cue" data-at="21.5"><span class="at">20</span><div class="what">
         <p class="slide-name">A door: at most 24 inside <span class="min">0:21</span></p>
         <p class="goal">Admission control in a Jakarta REST filter.</p>
         <p><span class="kind">click 0</span>“The door is a Jakarta REST request filter with a semaphore.”</p>
@@ -556,14 +561,14 @@ code {
         <p><span class="kind">click 3</span>“And the response filter hands the permit back on the way out.”</p>
         <p><span class="kind">click 4</span>“Why 24? The provider does about 360 charges a second, and a reservation takes about 52 ms. Little’s law: 360 times 0.052 is about 19 inside at full speed. 24 leaves room for bursts.”</p>
       </div></li>
-      <li class="cue" data-at="24"><span class="at">20</span><div class="what">
+      <li class="cue" data-at="24"><span class="at">21</span><div class="what">
         <p class="slide-name">The same sale, with a door <span class="min">0:24</span></p>
         <p class="goal">The door survives the big sale.</p>
         <p><span class="kind">click 0</span>“The same simulation, with the door.”</p>
         <p><span class="kind">click 1</span>Plays three seconds, then freezes. “In flight climbs to 24 and stops. Everyone else is turned away at once.”</p>
         <p><span class="kind">click 2</span>“926 told to try again at once, never more than 24 inside. But 24 is more than the provider’s 20, so 50 payments still failed. That is the next fix.”</p>
       </div></li>
-      <li class="cue" data-at="26"><span class="at">21</span><div class="what">
+      <li class="cue" data-at="26"><span class="at">22</span><div class="what">
         <p class="slide-name">maxAsync is back, as a budget <span class="min">0:26</span></p>
         <p class="goal">The same attribute, now a budget per dependency.</p>
         <p><span class="kind">click 0</span>“Behind the door, one executor per dependency.”</p>
@@ -573,7 +578,7 @@ code {
         <p><span class="kind run">Run</span><code class="cmd">./run.sh state budgeted</code></p>
         <p class="note"><b>Background.</b> @Bulkhead(20) from MicroProfile Fault Tolerance is another way to write the payment budget.</p>
       </div></li>
-      <li class="cue" data-at="28.5"><span class="at">22</span><div class="what">
+      <li class="cue" data-at="28.5"><span class="at">23</span><div class="what">
         <p class="slide-name">The same launch, limits written down <span class="min">0:28</span></p>
         <p class="goal">The rebuilt service at the big sale.</p>
         <p><span class="kind">click 0</span>“The same launch. The broken run, faint.”</p>
@@ -581,14 +586,14 @@ code {
         <p class="note">Fallback: results/budgets-big-1.html.</p>
         <p><span class="kind">click 1</span>Plays the rebuilt run. “p99: 114 milliseconds. The grey columns are the people told to try again: 991. And not one payment failed.”</p>
       </div></li>
-      <li class="cue" data-at="30.5"><span class="at">23</span><div class="what">
+      <li class="cue" data-at="30.5"><span class="at">24</span><div class="what">
         <p class="slide-name">Saying no to 991 people <span class="min">0:30</span></p>
         <p class="goal">Refusing some got more served on time.</p>
         <p><span class="kind">click 0</span>“Saying no to 991 people got 1,080 more a fast yes.”</p>
         <p class="note"><b>Background.</b> 2,731 on time rebuilt, against 1,651 switched.</p>
         <p><span class="kind">click 1</span>“And nobody’s payment failed. A fast no beats a slow yes and a failed charge.”</p>
       </div></li>
-      <li class="cue" data-at="32"><span class="at">24</span><div class="what">
+      <li class="cue" data-at="32"><span class="at">25</span><div class="what">
         <p class="slide-name">Check 2 <span class="min">0:32</span></p>
         <p class="goal">Second take-home question.</p>
         <p>“Second check.” Read it out. “Sixteen was a number left over from a thread pool. Twenty and twenty came from the dependencies.”</p>
@@ -603,53 +608,53 @@ code {
       <p class="seg-point">A deadline on the wait does nothing to the work, and cancelling does not un-send a charge.</p>
     </div>
     <ol class="cues">
-      <li class="cue" data-at="33"><span class="at">25</span><div class="what">
+      <li class="cue" data-at="33"><span class="at">26</span><div class="what">
         <p class="slide-name">Deadlines <span class="min">0:33</span></p>
         <p class="goal">Open part three.</p>
         <p>“Part three. The provider has a bad day: 1,800 ms a charge. The customer waits 500.”</p>
       </div></li>
-      <li class="cue" data-at="33.5"><span class="at">26</span><div class="what">
+      <li class="cue" data-at="33.5"><span class="at">27</span><div class="what">
         <p class="slide-name">We answer at 500 ms <span class="min">0:33</span></p>
         <p class="goal">Show the deadline everyone writes.</p>
         <p><span class="kind">click 0</span>“orTimeout on the combined future. At 500 ms the customer gets a 504 and a message to try again.”</p>
         <p><span class="kind">click 1</span>“What happens to the payment?”</p>
       </div></li>
-      <li class="cue" data-at="34.5"><span class="at">27</span><div class="what">
+      <li class="cue" data-at="34.5"><span class="at">28</span><div class="what">
         <p class="slide-name">We said it failed. Then we charged. <span class="min">0:34</span></p>
         <p class="goal">The customer left. The work stayed.</p>
         <p><span class="kind">click 0</span>Plays in real time. Stay silent until it stops. “At 507 ms we told the customer it failed. At 1,850 ms we charged the card.”</p>
         <p><span class="kind">click 1</span>“And the customer presses retry. That is a second charge on its way.”</p>
         <p><span class="kind">click 2</span>“orTimeout limits how long the customer waits. It says nothing to the work.”</p>
       </div></li>
-      <li class="cue" data-at="35.5"><span class="at">28</span><div class="what">
+      <li class="cue" data-at="35.5"><span class="at">29</span><div class="what">
         <p class="slide-name">The fix: cancel the work <span class="min">0:35</span></p>
         <p class="goal">Cancel every part at the deadline.</p>
         <p><span class="kind">click 0</span>“The fix: when the deadline fires, cancel every part.”</p>
         <p><span class="kind">click 1</span>“One line: part.cancel(true).”</p>
         <p><span class="kind">click 2</span>“A detail worth knowing: on Liberty, cancel(true) on a managed CompletableFuture interrupts the task. On a plain JDK CompletableFuture it does nothing to the running task.”</p>
       </div></li>
-      <li class="cue" data-at="36"><span class="at">29</span><div class="what">
+      <li class="cue" data-at="36"><span class="at">30</span><div class="what">
         <p class="slide-name">Cancelled at 507 ms <span class="min">0:36</span></p>
         <p class="goal">Cancel stops your call, not the charge.</p>
         <p><span class="kind">click 0</span>Plays. “Timed out at 506, payment call cancelled at 507. The last run’s long bar is the ghost.”</p>
         <p><span class="kind">click 1</span>“But look at the provider. It already had the request, and it charged the card anyway. Cancel stops your call. It does not un-send the charge.”</p>
         <p class="note"><b>Background.</b> Measured: with cancel, the provider still logged one charge.</p>
       </div></li>
-      <li class="cue" data-at="37"><span class="at">30</span><div class="what">
+      <li class="cue" data-at="37"><span class="at">31</span><div class="what">
         <p class="slide-name">Charge each reservation once <span class="min">0:37</span></p>
         <p class="goal">Idempotency keys make the retry safe.</p>
         <p><span class="kind">click 0</span>“So the retry has to be safe. The customer sends an Idempotency-Key, and we pass it to the provider.”</p>
         <p><span class="kind">click 1</span>“Without a key the retry is a new reservation: two charges, eight seat holds. With the key the retry finds the first charge: 201 in 26 milliseconds, four seat holds.”</p>
         <p><span class="kind">click 2</span>“Charged once.”</p>
       </div></li>
-      <li class="cue" data-at="38"><span class="at">31</span><div class="what">
+      <li class="cue" data-at="38"><span class="at">32</span><div class="what">
         <p class="slide-name">Where this is going <span class="min">0:38</span></p>
         <p class="goal">Structured concurrency owns the deadline.</p>
         <p><span class="kind">click 0</span>“Where this is going: structured concurrency. The scope owns the deadline, and nothing leaves the scope while its work runs.”</p>
         <p><span class="kind">click 1</span>“It is a preview in JDK 25, and this is plain Java from my last talk, not Liberty yet.”</p>
         <p><span class="kind">click 2</span>“Cancelled at 207, reported at 208: the work stops before the customer is told.”</p>
       </div></li>
-      <li class="cue" data-at="38.5"><span class="at">32</span><div class="what">
+      <li class="cue" data-at="38.5"><span class="at">33</span><div class="what">
         <p class="slide-name">Check 3 <span class="min">0:38</span></p>
         <p class="goal">Third take-home question.</p>
         <p>“Third check.” Read it out.</p>
@@ -664,7 +669,7 @@ code {
       <p class="seg-point">What to watch, three checks, then questions.</p>
     </div>
     <ol class="cues">
-      <li class="cue" data-at="39"><span class="at">33</span><div class="what">
+      <li class="cue" data-at="39"><span class="at">34</span><div class="what">
         <p class="slide-name">What to watch <span class="min">0:39</span></p>
         <p class="goal">The metrics that warn before collapse.</p>
         <p><span class="kind">click 0</span>“What to watch. Requests in flight: 829 at the big sale, 24 behind the door.”</p>
@@ -673,26 +678,23 @@ code {
         <p><span class="kind">click 3</span>“Refusals: the 429s you get and the 503s you give. The first is a warning, the second is your protection working.”</p>
         <p><span class="kind">click 4</span>“And p99 second by second. An average over the run hides a sale.”</p>
       </div></li>
-      <li class="cue" data-at="40.5"><span class="at">34</span><div class="what">
+      <li class="cue" data-at="40.5"><span class="at">35</span><div class="what">
         <p class="slide-name">Three checks to take home <span class="min">0:40</span></p>
         <p class="goal">Leave them with something to do on Monday.</p>
         <p>“Three checks for Monday.” Read them. Leave the slide up for a moment.</p>
       </div></li>
-      <li class="cue" data-at="41.5"><span class="at">35</span><div class="what">
+      <li class="cue" data-at="41.5"><span class="at">36</span><div class="what">
         <p class="slide-name">Threads got free. Nothing else did. <span class="min">0:41</span></p>
         <p class="goal">The whole talk in one slide.</p>
-        <p><span class="kind">click 0</span>“Threads got free. Nothing else did. Sixteen threads were doing three jobs nobody gave them.”</p>
-        <p><span class="kind">click 1</span>“Keeping the database under its 20 connections.”</p>
-        <p><span class="kind">click 2</span>“Keeping the provider under its limit, so @Retry never fired.”</p>
-        <p><span class="kind">click 3</span>“Being the one number in the system that said ‘enough’.”</p>
-        <p><span class="kind">click 4</span>“Those jobs are yours now.”</p>
+        <p><span class="kind">click 0</span>“Threads got free. Nothing else did. Sixteen threads were doing three jobs nobody gave them: keeping the database under its 20 connections, keeping the provider under its limit, so @Retry never fired, and being the one number in the system that said ‘enough’.”</p>
+        <p><span class="kind">click 1</span>“Those jobs are yours now.”</p>
       </div></li>
-      <li class="cue" data-at="42.5"><span class="at">36</span><div class="what">
+      <li class="cue" data-at="42.5"><span class="at">37</span><div class="what">
         <p class="slide-name">Thank you <span class="min">0:42</span></p>
         <p class="goal">Close, point at the code, open the floor.</p>
         <p>“Thank you. The code is on GitHub, and ./run.sh state before, switched, budgeted, deadlines puts every version in front of you.”</p>
       </div></li>
-      <li class="cue" data-at="43"><span class="at">37</span><div class="what">
+      <li class="cue" data-at="43"><span class="at">38</span><div class="what">
         <p class="slide-name">The long version <span class="min">0:43</span></p>
         <p class="goal">Leave this up during questions.</p>
         <p>“If you want the long version, it is in the book. The QR code goes there.” Then take questions from the chat.</p>
