@@ -280,7 +280,7 @@ if '.goal' not in page:
     rules = '.goal { color: var(--act); font-weight: 700; }\n'
     if '.slide-name' not in page:
         rules = '''.slide-name { font-weight: 700; }
-.slide-name .min { margin-left: 0.4rem; font-family: var(--font-mono); font-size: 0.8125rem; font-weight: 400; color: var(--muted); }
+.slide-name .min { margin-left: 0.4rem; font-family: var(--font-mono); font-size: 1rem; font-weight: 400; color: var(--muted); }
 .cue.is-now .slide-name .min { color: var(--now); }
 ''' + rules
     page = page.replace('</style>', rules + '</style>', 1)

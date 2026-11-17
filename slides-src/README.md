@@ -41,7 +41,8 @@
 | `tools/numbers_sheet.sh` | Rebuilds `specs/_numbers.md` from `../docs/numbers.md` and the vfun numbers this deck reuses |
 | `tools/series_data.py` | Writes the measured per-second series from `../docs/series/` into `scenes/p99.js` |
 | `tools/style_probe.mjs` | Reads the built deck in headless Chrome: computed `styles` in a state, every `colors` painted, text below readable `contrast`, `fonts`, the phone `page` and a touch `swipe`; `--device phone-upright` or `phone-sideways` emulates a phone |
-| `tools/cdp.mjs` | The headless Chrome plumbing `live_run.mjs` and `style_probe.mjs` share |
+| `tools/page_probe.mjs` | Opens a plain page such as `run-of-show.html` at one phone size and lists text under 16 px, tap targets under 44 px, cut-off timeline labels and sideways scroll |
+| `tools/cdp.mjs` | The headless Chrome plumbing `live_run.mjs`, `style_probe.mjs` and `page_probe.mjs` share |
 
 The screenshot tools expect Chrome in `/Applications`. `node build.mjs --no-notes` builds a copy without the speaker notes.
 
@@ -56,5 +57,5 @@ The colors and fonts live in `themes/`, one file per look; `core/theme.css` only
 
 `node build.mjs --theme blueprint` builds the other look; switching for good is the one line `const DEFAULT_THEME = 'jakarta-light';` in `build.mjs`. A theme can embed a font from `assets/fonts/` with `url("font:<file>")`; the build inlines it, so the deck still works offline. Inter is under the SIL Open Font License, in `assets/fonts/OFL.txt`.
 
-`tools/test_theme.py` pins the Jakarta colors, checks no blueprint navy or yellow is painted in any state and every text run is readable; `tools/test_phone.py` checks the deck on a phone (the hint under an upright slide, no fullscreen button, swiping).
+`tools/test_theme.py` pins the Jakarta colors, checks no blueprint navy or yellow is painted in any state and every text run is readable; `tools/test_phone.py` checks the deck on a phone (the hint under an upright slide, no fullscreen button, swiping). `tools/test_run_of_show.py` checks the phone page at 375 and 390 px upright and sideways.
 

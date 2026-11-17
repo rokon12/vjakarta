@@ -23,7 +23,7 @@
   --ask-soft: #f0e5f5;
   --over: #b3261e;
   --font-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --font-display: "Barlow Condensed", "Avenir Next Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
@@ -116,7 +116,7 @@ button {
   background: var(--bg);
   border: 1px solid var(--rule);
   border-radius: 0.5rem;
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   padding: 0 0.9rem;
   cursor: pointer;
 }
@@ -125,7 +125,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--now); outli
 .nowline {
   flex: 1 1 100%;
   min-width: 0;
-  min-height: 2rem;
+  min-height: 2.75rem;
   text-align: left;
   padding: 0.2rem 0.6rem;
   font-weight: 700;
@@ -145,7 +145,7 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--now); outli
 .wrap > * { min-width: 0; }
 .intro { display: grid; gap: 0.6rem; }
 .eyebrow {
-  font-size: 0.8125rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -163,11 +163,12 @@ h1 {
 /* the hour, to scale: 1% of the width is 0.6 minutes */
 .hour { display: grid; gap: 0; }
 .hour-track { position: relative; }
-.hour-bar { display: flex; height: 2.25rem; border-radius: 0.25rem; overflow: hidden; }
+.hour-bar { display: flex; height: 2.5rem; border-radius: 0.25rem; overflow: hidden; }
 .hb {
   min-width: 0;
   overflow: hidden;
-  white-space: nowrap;
+  text-align: center;
+  line-height: 1;
   background: var(--rule);
   box-shadow: inset -2px 0 0 var(--bg);
   display: flex;
@@ -176,7 +177,6 @@ h1 {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1rem;
-  letter-spacing: 0.03em;
 }
 .hb:last-child { box-shadow: none; }
 .hb.demo { background: var(--ink); color: var(--bg); }
@@ -191,9 +191,9 @@ h1 {
 }
 .hour-ticks {
   position: relative;
-  height: 1.4rem;
+  height: 1.6rem;
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 1rem;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
 }
@@ -242,7 +242,7 @@ h2 {
 .cue.is-now + .cue { border-top-color: transparent; }
 .at {
   font-family: var(--font-mono);
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
   padding-top: 0.1rem;
@@ -252,10 +252,8 @@ h2 {
 .what > * { min-width: 0; }
 .kind {
   display: inline-block;
-  font-size: 0.6875rem;
+  font-size: 1rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   padding: 0.05rem 0.4rem;
   margin-right: 0.35rem;
   border-radius: 0.25rem;
@@ -268,7 +266,7 @@ h2 {
 .note { color: var(--muted); }
 code {
   font-family: var(--font-mono);
-  font-size: 0.875em;
+  font-size: 1em;
   background: var(--surface);
   border: 1px solid var(--rule);
   border-radius: 0.25rem;
@@ -296,7 +294,7 @@ code {
 .back { border-top: 2px solid var(--ink); padding-top: 1rem; display: grid; gap: 0.75rem; }
 .back h2 { font-size: 1.75rem; }
 .list { display: grid; gap: 0.5rem; }
-.preflight label { display: grid; grid-template-columns: 1.5rem minmax(0, 1fr); gap: 0.5rem; align-items: start; cursor: pointer; }
+.preflight label { display: grid; grid-template-columns: 1.5rem minmax(0, 1fr); gap: 0.5rem; align-items: start; align-content: center; min-height: 2.75rem; cursor: pointer; }
 .preflight input { width: 1.15rem; height: 1.15rem; margin: 0.2rem 0 0; accent-color: var(--now); }
 .steps { counter-reset: step; }
 .steps li { display: grid; grid-template-columns: 1.5rem minmax(0, 1fr); gap: 0.5rem; }
@@ -305,7 +303,7 @@ code {
 .qa dt { font-weight: 700; }
 .qa dd { color: var(--muted); }
 .slide-name { font-weight: 700; }
-.slide-name .min { margin-left: 0.4rem; font-family: var(--font-mono); font-size: 0.8125rem; font-weight: 400; color: var(--muted); }
+.slide-name .min { margin-left: 0.4rem; font-family: var(--font-mono); font-size: 1rem; font-weight: 400; color: var(--muted); }
 .cue.is-now .slide-name .min { color: var(--now); }
 .goal { color: var(--act); font-weight: 700; }
 </style>
@@ -335,7 +333,7 @@ code {
         <span class="hb demo" style="flex:6">Switch</span>
         <span class="hb demo" style="flex:6">Moved</span>
         <span class="hb demo" style="flex:12">Rebuild</span>
-        <span class="hb demo" style="flex:6">Deadlines</span>
+        <span class="hb demo" style="flex:6">Dead&shy;lines</span>
         <span class="hb" style="flex:6"></span>
       </div>
       <i class="hour-mark" id="mark" hidden></i>
